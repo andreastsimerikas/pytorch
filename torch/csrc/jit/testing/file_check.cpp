@@ -189,6 +189,7 @@ struct FileCheckImpl {
     addCheck(Check(type, s, count));
   }
 
+  // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   bool has_run = false;
 
   friend std::ostream& operator<<(std::ostream& out, const FileCheckImpl& fc);
@@ -548,7 +549,11 @@ FileCheck* FileCheck::check_count(
     const std::string& str,
     size_t count,
     bool exactly) {
-  fcImpl->addCheck(CHECK_COUNT, str, count);
+  TORCH_INTERNAL_ASSERT(
+      count != 0 || exactly, "Count == 0 && !exactly doesn't do anything");
+  if (count) {
+    fcImpl->addCheck(CHECK_COUNT, str, count);
+  }
   if (exactly) {
     fcImpl->addCheck(CHECK_NOT, str);
   }

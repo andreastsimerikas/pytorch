@@ -4,13 +4,15 @@ import numpy as np
 from itertools import product, combinations, permutations
 from functools import partial
 import random
+import warnings
 
 from torch._six import nan
 from torch.testing._internal.common_utils import (
     TestCase, run_tests, make_tensor, torch_to_numpy_dtype_dict)
+from torch.testing._internal.common_methods_invocations import shape_funcs
 from torch.testing._internal.common_device_type import (
     instantiate_device_type_tests, onlyCPU, dtypes, onlyOnCPUAndCUDA,
-    dtypesIfCPU, dtypesIfCUDA)
+    dtypesIfCPU, dtypesIfCUDA, ops)
 
 # TODO: replace with make_tensor
 def _generate_input(shape, dtype, device, with_extremal):
@@ -61,11 +63,11 @@ class TestShapeOps(TestCase):
     @onlyCPU
     def test_tolist(self, device):
         list0D = []
-        tensor0D = torch.Tensor(list0D)
+        tensor0D = torch.tensor(list0D)
         self.assertEqual(tensor0D.tolist(), list0D)
 
-        table1D = [1, 2, 3]
-        tensor1D = torch.Tensor(table1D)
+        table1D = [1., 2., 3.]
+        tensor1D = torch.tensor(table1D)
         storage = torch.Storage(table1D)
         self.assertEqual(tensor1D.tolist(), table1D)
         self.assertEqual(storage.tolist(), table1D)
@@ -73,10 +75,10 @@ class TestShapeOps(TestCase):
         self.assertEqual(storage.tolist(), table1D)
 
         table2D = [[1, 2], [3, 4]]
-        tensor2D = torch.Tensor(table2D)
+        tensor2D = torch.tensor(table2D)
         self.assertEqual(tensor2D.tolist(), table2D)
 
-        tensor3D = torch.Tensor([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+        tensor3D = torch.tensor([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
         tensorNonContig = tensor3D.select(1, 1)
         self.assertFalse(tensorNonContig.is_contiguous())
         self.assertEqual(tensorNonContig.tolist(), [[3, 4], [7, 8]])
@@ -378,20 +380,24 @@ class TestShapeOps(TestCase):
             self.assertEqual(size, list(data.flip(ds).size()))
 
         # test rectangular case
-        data = torch.tensor([1, 2, 3, 4, 5, 6]).view(2, 3).to(device)
-        flip0_result = torch.tensor([[4, 5, 6], [1, 2, 3]]).to(device)
-        flip1_result = torch.tensor([[3, 2, 1], [6, 5, 4]]).to(device)
+        data = torch.tensor([1, 2, 3, 4, 5, 6], device=device).view(2, 3)
+        flip0_result = torch.tensor([[4, 5, 6], [1, 2, 3]], device=device)
+        flip1_result = torch.tensor([[3, 2, 1], [6, 5, 4]], device=device)
 
         self.assertEqual(flip0_result, data.flip(0))
         self.assertEqual(flip1_result, data.flip(1))
 
         # test empty tensor, should just return an empty tensor of the same shape
-        data = torch.tensor([])
+        data = torch.tensor((), device=device)
         self.assertEqual(data, data.flip(0))
 
         # test bool tensor
-        a = torch.tensor([False, True])
+        a = torch.tensor([False, True], device=device)
         self.assertEqual(a.flip(0), torch.tensor([True, False]))
+
+        # case: dims=()
+        a = torch.randn(3, 2, 1, device=device)
+        self.assertEqual(a.flip(dims=()), a)
 
     def _rand_shape(self, dim, min_size, max_size):
         shape = []
@@ -486,6 +492,17 @@ class TestShapeOps(TestCase):
             np_fn = partial(np.rot90, k=rot_times, axes=[0, 1])
             self.compare_with_numpy(torch_fn, np_fn, data)
 
+    # TODO: update once warning flag is available to always trigger ONCE warnings
+    # Ensures nonzero does not throw a warning, even when the as_tuple argument
+    #   is not provided
+    def test_nonzero_no_warning(self, device):
+        t = torch.randn((2, 2), device=device)
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            torch.nonzero(t)
+            t.nonzero()
+            self.assertEqual(len(w), 0)
+
     @dtypes(*torch.testing.get_all_dtypes(include_complex=False))
     def test_nonzero(self, device, dtype):
 
@@ -516,7 +533,7 @@ class TestShapeOps(TestCase):
                 self.assertRaisesRegex(
                     RuntimeError,
                     "scalar type Long",
-                    lambda: torch.nonzero(tensor, out=torch.empty([], dtype=torch.float))
+                    lambda: torch.nonzero(tensor, out=torch.empty([], dtype=torch.float, device=device))
                 )
             if self.device_type == 'cuda':
                 self.assertRaisesRegex(
@@ -595,7 +612,21 @@ class TestShapeOps(TestCase):
         nz = x.nonzero()
         self.assertFalse(nz.requires_grad)
 
+class TestShapeFuncs(TestCase):
+    """Test suite for Shape manipulating operators using the ShapeFuncInfo."""
+
+    @dtypes(*(torch.uint8, torch.int64, torch.double, torch.complex128))
+    @ops([op for op in shape_funcs if op.name in ['tile', 'repeat']])
+    def test_repeat_tile_vs_numpy(self, device, dtype, op):
+        samples = op.sample_inputs(device, dtype, requires_grad=False)
+        for sample in samples:
+            assert isinstance(sample.input, torch.Tensor)
+            expected = op.ref(sample.input.cpu().numpy(), *sample.args, **sample.kwargs)
+            result = op(sample.input, *sample.args, **sample.kwargs).cpu().numpy()
+            self.assertEqual(expected, result)
+
 instantiate_device_type_tests(TestShapeOps, globals())
+instantiate_device_type_tests(TestShapeFuncs, globals())
 
 if __name__ == '__main__':
     run_tests()

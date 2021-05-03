@@ -139,6 +139,7 @@ struct GraphFuser {
   // limit here.
   // This limit is also applied to other devices in the fuser by default.
   // Change with setInputArgLimit
+  // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
   size_t subgraph_arg_limit_ = 128;
 
   GraphFuser(AliasDb* aliasDb, Block* block, bool strict_fuser_check)
@@ -177,7 +178,7 @@ struct GraphFuser {
     if (!v->type()->isSubtypeOf(TensorType::get())) {
       return true;
     }
-    auto device = v->type()->expect<TensorType>()->device();
+    auto device = v->type()->expectRef<TensorType>().device();
     if (!device) {
       return !strict_fuser_check;
     }
@@ -185,8 +186,11 @@ struct GraphFuser {
       return canFuseOnCPU();
     } else if ((*device).is_cuda()) {
       return canFuseOnGPU();
+    } else if ((*device).is_xpu()) {
+      return false;
+    } else {
+      TORCH_CHECK_NOT_IMPLEMENTED(false, "Unknown device for graph fuser");
     }
-    throw std::runtime_error("Unknown device");
   }
 
   // Default fusability check - used when the user doesn't pass in
@@ -812,6 +816,7 @@ struct GraphFuser {
         if (original_input->type()->isSubtypeOf(TensorType::get())) {
           AT_ASSERT(chunked_inputs_it != chunked_inputs.end());
           chunked_op->addInput(
+              // NOLINTNEXTLINE(clang-analyzer-core.DivideZero)
               chunked_inputs_it->at(chunk_sel->offset() % nchunks));
           ++chunked_inputs_it;
         } else {
@@ -1151,6 +1156,7 @@ struct GraphFuser {
     while (any_changed) {
       any_changed = false;
       for (auto it = block_->nodes().rbegin(); it != block_->nodes().rend();) {
+        // NOLINTNEXTLINE(cppcoreguidelines-init-variables)
         bool changed;
         std::tie(it, changed) = scanNode(*it);
         any_changed |= changed;

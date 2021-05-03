@@ -11,6 +11,7 @@
 #include <tuple>
 #include <ATen/ATen.h>
 #include <torch/csrc/WindowsTorchApiMacro.h>
+#include <torch/csrc/autograd/profiler_utils.h>
 #ifndef _WIN32
 #include <ctime>
 #endif
@@ -71,7 +72,7 @@ constexpr inline size_t ceilToMultiple(size_t a, size_t b) {
   return ((a + b - 1) / b) * b;
 }
 
-inline int64_t getTime() {
+inline int64_t getTime(bool allow_monotonic = false) {
 #if defined(C10_IOS) && defined(C10_MOBILE)
 // clock_gettime is only available on iOS 10.0 or newer. Unlike OS X, iOS can't rely on
 // CLOCK_REALTIME, as it is defined no matter if clock_gettime is implemented or not
@@ -85,7 +86,12 @@ inline int64_t getTime() {
 #else
   // clock_gettime is *much* faster than std::chrono implementation on Linux
   struct timespec t{};
-  clock_gettime(CLOCK_MONOTONIC, &t);
+  auto mode = CLOCK_REALTIME;
+  if (allow_monotonic) {
+    mode = CLOCK_MONOTONIC;
+  }
+  clock_gettime(mode, &t);
+  // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
   return static_cast<int64_t>(t.tv_sec) * 1000000000 + static_cast<int64_t>(t.tv_nsec);
 #endif
 }
@@ -99,6 +105,7 @@ enum class C10_API_ENUM EventKind : uint16_t {
 
 // To be deprecated, once we switch to Kineto profiling
 struct TORCH_API LegacyEvent {
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
   LegacyEvent(
       EventKind kind,
       at::StringView name,
@@ -117,6 +124,7 @@ struct TORCH_API LegacyEvent {
   }
 
   // Constructor to be used in conjunction with LegacyEvent::fromIValue.
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
   LegacyEvent(
       EventKind kind,
       at::StringView name,
@@ -170,6 +178,10 @@ struct TORCH_API LegacyEvent {
     throw std::runtime_error("unknown event kind");
   }
 
+  EventKind kind() const {
+    return kind_;
+  }
+
   const char* name() const {
     return name_.str();
   }
@@ -183,14 +195,17 @@ struct TORCH_API LegacyEvent {
   }
 
   double cpuElapsedUs(const LegacyEvent& e) const {
+    // NOLINTNEXTLINE(cppcoreguidelines-narrowing-conversions,bugprone-narrowing-conversions,cppcoreguidelines-avoid-magic-numbers)
     return (e.cpu_ns_ - cpu_ns_)/(1000.0);
   }
 
   void setCpuUs(int64_t cpu_us) {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     cpu_ns_ = cpu_us * 1000.0;
   }
 
   double cpuUs() const {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     return cpu_ns_ / (1000.0);
   }
 
@@ -205,10 +220,10 @@ struct TORCH_API LegacyEvent {
   }
 
   void updateMemoryStats(int64_t alloc_size, c10::Device device) {
-    if (device.type() == c10::DeviceType::CUDA ||
+    if (device.is_cuda() ||
         device.type() == c10::DeviceType::HIP) {
       cuda_memory_usage_ = alloc_size;
-    } else if (device.type() == c10::DeviceType::CPU ||
+    } else if (device.is_cpu() ||
         device.type() == c10::DeviceType::MKLDNN ||
         device.type() == c10::DeviceType::IDEEP) {
       cpu_memory_usage_ = alloc_size;
@@ -291,6 +306,22 @@ struct TORCH_API LegacyEvent {
     scope_ = scope;
   }
 
+  const std::unordered_map<std::string, c10::IValue>& extraArgs() const {
+    return extra_args_;
+  }
+
+  void setExtraArgs(std::unordered_map<std::string, c10::IValue>&& save_args) {
+    extra_args_ = std::move(save_args);
+  }
+
+  uint64_t flops() {
+    return flops_;
+  }
+
+  void setFlops(uint64_t flops) {
+    flops_ = flops;
+  }
+
  private:
   // signed to allow for negative intervals, initialized for safety.
   int64_t cpu_ns_ = 0;
@@ -312,6 +343,9 @@ struct TORCH_API LegacyEvent {
   std::vector<std::string> stack_;
   uint8_t scope_;
   uint64_t correlation_id_;
+  // Extra arguments for computing op flops
+  std::unordered_map<std::string, c10::IValue> extra_args_;
+  uint64_t flops_ = 0;
 };
 
 // a linked-list of fixed sized vectors, to avoid
@@ -367,16 +401,19 @@ struct TORCH_API ProfilerConfig {
       ProfilerState state,
       bool report_input_shapes = false,
       bool profile_memory = false,
-      bool with_stack = false)
+      bool with_stack = false,
+      bool with_flops = false)
       : state(state),
         report_input_shapes(report_input_shapes),
         profile_memory(profile_memory),
-        with_stack(with_stack) {}
+        with_stack(with_stack),
+        with_flops(with_flops) {}
   ~ProfilerConfig() = default;
   ProfilerState state;
   bool report_input_shapes;
   bool profile_memory;
   bool with_stack;
+  bool with_flops;
 
   // Returns IValues corresponding to ProfilerConfig struct, to be used for
   // serialization.
@@ -452,6 +489,7 @@ struct TORCH_API TLSProfilerGuard {
       c10::optional<ProfilerDisableOptions> profilerDisableOptions =
           c10::nullopt)
       : cb_(std::move(resultCallback)),
+        // NOLINTNEXTLINE(performance-move-const-arg)
         profilerDisableOptions_(std::move(profilerDisableOptions)) {
     enableProfilerLegacy(cfg);
   }
@@ -530,12 +568,17 @@ struct TORCH_API ProfilerThreadLocalState : public c10::MemoryReportingInfoBase 
 
   RangeEventList& getEventList(int64_t thread_id = -1);
 
+  // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   std::mutex state_mutex_;
   std::unordered_map<uint64_t, std::shared_ptr<RangeEventList>>
+      // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
       event_lists_map_;
 
+  // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   ProfilerConfig config_ = ProfilerConfig(ProfilerState::Disabled);
+  // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   at::CallbackHandle handle_ = 0;
+  // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   c10::optional<std::vector<std::vector<LegacyEvent>>> remoteProfiledEvents_;
 };
 

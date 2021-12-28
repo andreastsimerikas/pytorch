@@ -1,17 +1,51 @@
 import bisect
-import warnings
 import functools
+import warnings
+from typing import (
+    Callable,
+    Dict,
+    Generic,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+)
 
-from torch._utils import _accumulate
-from torch import randperm
 # No 'default_generator' in torch/__init__.pyi
-from torch import default_generator
+from torch import default_generator, randperm
+from torch._utils import _accumulate
 from torch.utils.data._typing import _DataPipeMeta
-from typing import TypeVar, Generic, Iterable, Iterator, Sequence, List, Optional, Tuple, Dict, Callable
-from ... import Tensor, Generator
+
+from ... import Generator, Tensor
 
 T_co = TypeVar('T_co', covariant=True)
 T = TypeVar('T')
+
+UNTRACABLE_DATAFRAME_PIPES = ['batch',  # As it returns DataChunks
+                              'groupby',   # As it returns DataChunks
+                              '_dataframes_as_tuples',  # As it unpacks DF
+                              'trace_as_dataframe',  # As it used to mark DF for tracing
+                              ]
+
+class DataChunk(list, Generic[T]):
+    def __init__(self, items):
+        super().__init__(items)
+        self.items = items
+
+    def as_str(self, indent=''):
+        res = indent + "[" + ", ".join(str(i) for i in iter(self)) + "]"
+        return res
+
+    def __iter__(self) -> Iterator[T]:
+        for i in super().__iter__():
+            yield i
+
+    def raw_iterator(self) -> T:
+        for i in self.items:
+            yield i
 
 
 class Dataset(Generic[T_co]):
@@ -29,6 +63,7 @@ class Dataset(Generic[T_co]):
       sampler that yields integral indices.  To make it work with a map-style
       dataset with non-integral indices/keys, a custom sampler must be provided.
     """
+    functions: Dict[str, Callable] = {}
 
     def __getitem__(self, index) -> T_co:
         raise NotImplementedError
@@ -40,8 +75,36 @@ class Dataset(Generic[T_co]):
     # See NOTE [ Lack of Default `__len__` in Python Abstract Base Classes ]
     # in pytorch/torch/utils/data/sampler.py
 
+    def __getattr__(self, attribute_name):
+        if attribute_name in Dataset.functions:
+            function = functools.partial(Dataset.functions[attribute_name], self)
+            return function
+        else:
+            raise AttributeError("'{0}' object has no attribute '{1}".format(self.__class__.__name__, attribute_name))
 
-class IterableDataset(Dataset[T_co], metaclass=_DataPipeMeta):
+    @classmethod
+    def register_function(cls, function_name, function):
+        cls.functions[function_name] = function
+
+    @classmethod
+    def register_datapipe_as_function(cls, function_name, cls_to_register, enable_df_api_tracing=False):
+        if function_name in cls.functions:
+            raise Exception("Unable to add DataPipe function name {} as it is already taken".format(function_name))
+
+        def class_function(cls, enable_df_api_tracing, source_dp, *args, **kwargs):
+            result_pipe = cls(source_dp, *args, **kwargs)
+            if isinstance(result_pipe, Dataset):
+                if enable_df_api_tracing or isinstance(source_dp, DFIterDataPipe):
+                    if function_name not in UNTRACABLE_DATAFRAME_PIPES:
+                        result_pipe = result_pipe.trace_as_dataframe()
+
+            return result_pipe
+
+        function = functools.partial(class_function, cls_to_register, enable_df_api_tracing)
+        cls.functions[function_name] = function
+
+
+class IterableDataset(Dataset[T_co]):
     r"""An iterable Dataset.
 
     All datasets that represent an iterable of data samples should subclass it.
@@ -143,53 +206,56 @@ class IterableDataset(Dataset[T_co], metaclass=_DataPipeMeta):
         >>> print(list(torch.utils.data.DataLoader(ds, num_workers=20, worker_init_fn=worker_init_fn)))
         [3, 4, 5, 6]
     """
-    functions: Dict[str, Callable] = {}
-    reduce_ex_hook : Optional[Callable] = None
-
     def __iter__(self) -> Iterator[T_co]:
         raise NotImplementedError
 
     def __add__(self, other: Dataset[T_co]):
         return ChainDataset([self, other])
 
-    # No `def __len__(self)` default?
+    # No `def __len__(self)` default? Subclasses raise `TypeError` when needed.
     # See NOTE [ Lack of Default `__len__` in Python Abstract Base Classes ]
 
+
+class IterDataPipe(IterableDataset[T_co], metaclass=_DataPipeMeta):
+    functions: Dict[str, Callable] = {}
+    reduce_ex_hook : Optional[Callable] = None
+    getstate_hook: Optional[Callable] = None
+
     def __getattr__(self, attribute_name):
-        if attribute_name in IterableDataset.functions:
-            function = functools.partial(IterableDataset.functions[attribute_name], self)
+        if attribute_name in IterDataPipe.functions:
+            function = functools.partial(IterDataPipe.functions[attribute_name], self)
             return function
         else:
-            raise AttributeError
+            raise AttributeError("'{0}' object has no attribute '{1}".format(self.__class__.__name__, attribute_name))
 
-    @classmethod
-    def register_function(cls, function_name, function):
-        IterableDataset.functions[function_name] = function
-
-    @classmethod
-    def register_datapipe_as_function(cls, function_name, cls_to_register):
-        if function_name in IterableDataset.functions:
-            raise Exception("Unable to add DataPipe function name {} as it is already taken".format(function_name))
-
-        def class_function(cls, source_dp, *args, **kwargs):
-            return cls(source_dp, *args, **kwargs)
-        function = functools.partial(class_function, cls_to_register)
-        IterableDataset.functions[function_name] = function
+    def __getstate__(self):
+        if IterDataPipe.getstate_hook is not None:
+            return IterDataPipe.getstate_hook(self)
+        return self.__dict__
 
     def __reduce_ex__(self, *args, **kwargs):
-        if IterableDataset.reduce_ex_hook is not None:
+        if IterDataPipe.reduce_ex_hook is not None:
             try:
-                return IterableDataset.reduce_ex_hook(self)
+                return IterDataPipe.reduce_ex_hook(self)
             except NotImplementedError:
                 pass
         return super().__reduce_ex__(*args, **kwargs)
 
     @classmethod
-    def set_reduce_ex_hook(cls, hook_fn):
-        if IterableDataset.reduce_ex_hook is not None and hook_fn is not None:
-            raise Exception("Attempt to override existing reduce_ex_hook")
-        IterableDataset.reduce_ex_hook = hook_fn
+    def set_getstate_hook(cls, hook_fn):
+        if IterDataPipe.getstate_hook is not None and hook_fn is not None:
+            raise Exception("Attempt to override existing getstate_hook")
+        IterDataPipe.getstate_hook = hook_fn
 
+    @classmethod
+    def set_reduce_ex_hook(cls, hook_fn):
+        if IterDataPipe.reduce_ex_hook is not None and hook_fn is not None:
+            raise Exception("Attempt to override existing reduce_ex_hook")
+        IterDataPipe.reduce_ex_hook = hook_fn
+
+class DFIterDataPipe(IterDataPipe):
+    def _is_dfpipe(self):
+        return True
 
 class TensorDataset(Dataset[Tuple[Tensor, ...]]):
     r"""Dataset wrapping tensors.
@@ -234,9 +300,8 @@ class ConcatDataset(Dataset[T_co]):
 
     def __init__(self, datasets: Iterable[Dataset]) -> None:
         super(ConcatDataset, self).__init__()
-        # Cannot verify that datasets is Sized
-        assert len(datasets) > 0, 'datasets should not be an empty iterable'  # type: ignore[arg-type]
         self.datasets = list(datasets)
+        assert len(self.datasets) > 0, 'datasets should not be an empty iterable'  # type: ignore[arg-type]
         for d in self.datasets:
             assert not isinstance(d, IterableDataset), "ConcatDataset does not support IterableDataset"
         self.cumulative_sizes = self.cumsum(self.datasets)
@@ -264,10 +329,10 @@ class ConcatDataset(Dataset[T_co]):
 
 
 class ChainDataset(IterableDataset):
-    r"""Dataset for chainning multiple :class:`IterableDataset` s.
+    r"""Dataset for chaining multiple :class:`IterableDataset` s.
 
     This class is useful to assemble different existing dataset streams. The
-    chainning operation is done on-the-fly, so concatenating large-scale
+    chaining operation is done on-the-fly, so concatenating large-scale
     datasets with this class will be efficient.
 
     Args:
@@ -287,7 +352,6 @@ class ChainDataset(IterableDataset):
         total = 0
         for d in self.datasets:
             assert isinstance(d, IterableDataset), "ChainDataset only supports IterableDataset"
-            # Cannot verify that all self.datasets are Sized
             total += len(d)
         return total
 
@@ -308,6 +372,8 @@ class Subset(Dataset[T_co]):
         self.indices = indices
 
     def __getitem__(self, idx):
+        if isinstance(idx, list):
+            return self.dataset[[self.indices[i] for i in idx]]
         return self.dataset[self.indices[idx]]
 
     def __len__(self):
@@ -328,7 +394,7 @@ def random_split(dataset: Dataset[T], lengths: Sequence[int],
         generator (Generator): Generator used for the random permutation.
     """
     # Cannot verify that dataset is Sized
-    if sum(lengths) != len(dataset):  # type: ignore[arg-type]
+    if sum(lengths) != len(dataset):
         raise ValueError("Sum of input lengths does not equal the length of the input dataset!")
 
     indices = randperm(sum(lengths), generator=generator).tolist()

@@ -6,7 +6,7 @@
 #include <torch/nn/modules/common.h>
 #include <torch/nn/modules/linear.h>
 
-#include <torch/csrc/WindowsTorchApiMacro.h>
+#include <torch/csrc/Export.h>
 
 namespace torch {
 namespace nn {
@@ -605,6 +605,28 @@ class TORCH_API SiLUImpl : public torch::nn::Cloneable<SiLUImpl> {
 /// provides, or the documentation for `ModuleHolder` to learn about PyTorch's
 /// module storage semantics.
 TORCH_MODULE(SiLU);
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Mish ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/// Applies mish over a given input.
+/// See https://pytorch.org/docs/master/nn.html#torch.nn.Mish to learn
+/// about the exact behavior of this module.
+// NOLINTNEXTLINE(bugprone-exception-escape)
+class TORCH_API MishImpl : public torch::nn::Cloneable<MishImpl> {
+ public:
+  Tensor forward(const Tensor& input);
+
+  void reset() override;
+
+  /// Pretty prints the `Mish` module into the given `stream`.
+  void pretty_print(std::ostream& stream) const override;
+};
+
+/// A `ModuleHolder` subclass for `MishImpl`.
+/// See the documentation for `MishImpl` class to learn what methods it
+/// provides, or the documentation for `ModuleHolder` to learn about PyTorch's
+/// module storage semantics.
+TORCH_MODULE(Mish);
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Sigmoid ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

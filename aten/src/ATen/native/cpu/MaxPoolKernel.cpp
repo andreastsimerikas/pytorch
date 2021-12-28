@@ -2,9 +2,10 @@
 
 #include <ATen/Dispatch.h>
 #include <ATen/Parallel.h>
-#include <ATen/cpu/vec256/vec256.h>
+#include <ATen/cpu/vec/vec.h>
 #include <ATen/native/Pool.h>
 #include <ATen/native/cpu/utils.h>
+#include <c10/util/irange.h>
 
 namespace at { namespace native {
 
@@ -43,7 +44,7 @@ void cpu_max_pool(
     int64_t ow = 0;
     data_index_init(begin, c, channels, oh, output_height, ow, output_width);
 
-    for (int64_t i = begin; i < end; i++) {
+    for (const auto i : c10::irange(begin, end)) {
       int64_t ih0 = oh * dH - padH;
       int64_t iw0 = ow * dW - padW;
       int64_t ih1 = std::min(ih0 + (kH - 1) * dilationH + 1, input_height);
@@ -112,9 +113,9 @@ void cpu_max_pool_channels_last(
   int64_t output_height = output.size(2);
   int64_t output_width = output.size(3);
 
-  using Vec = vec256::Vec256<scalar_t>;
-  using integer_t = vec256::int_same_size_t<scalar_t>;
-  using iVec = vec256::Vec256<integer_t>;
+  using Vec = vec::Vectorized<scalar_t>;
+  using integer_t = vec::int_same_size_t<scalar_t>;
+  using iVec = vec::Vectorized<integer_t>;
   // for the convience of vectorization, use integer of the same size of scalar_t,
   //   e.g. int32_t for float, int64_t for double
   // need to make sure doesn't overflow
@@ -133,7 +134,7 @@ void cpu_max_pool_channels_last(
     // NOLINTNEXTLINE(modernize-avoid-c-arrays,cppcoreguidelines-avoid-c-arrays)
     std::unique_ptr<integer_t []> index_buffer(new integer_t[len]);
 
-    for (int64_t i = begin; i < end; i++) {
+    for (const auto i : c10::irange(begin, end)) {
       int64_t ih0 = oh * dH - padH;
       int64_t iw0 = ow * dW - padW;
       int64_t ih1 = std::min(ih0 + (kH - 1) * dilationH + 1, input_height);
@@ -171,7 +172,7 @@ void cpu_max_pool_channels_last(
 
             // true = all ones, false = all zeros
             Vec mask = (val_vec > maxval_vec) | val_vec.isnan();
-            iVec imask = vec256::cast<integer_t>(mask);
+            iVec imask = vec::cast<integer_t>(mask);
             Vec out_vec = Vec::blendv(maxval_vec, val_vec, mask);
             iVec ind_vec = iVec::blendv(maxindex_vec, index_vec, imask);
 
@@ -191,7 +192,7 @@ void cpu_max_pool_channels_last(
         }
       }
       // convert indice data type
-      vec256::convert<integer_t, int64_t>(index_buffer.get(), ind, len);
+      vec::convert<integer_t, int64_t>(index_buffer.get(), ind, len);
 
       // move on to next output index
       data_index_step(n, nbatch, oh, output_height, ow, output_width);
@@ -229,13 +230,13 @@ void cpu_max_pool_backward(
 
   // parallel on dim of N, C
   at::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
-    for (int64_t c = begin; c < end; c++) {
+    for (const auto c : c10::irange(begin, end)) {
       scalar_t* grad_input_ptr = grad_input_data + c * input_height * input_width;
       scalar_t* grad_output_ptr = grad_output_data + c * output_height * output_width;
       int64_t * indices_ptr = indices_data + c * output_height * output_width;
 
-      for (int64_t oh = 0; oh < output_height; oh++) {
-        for (int64_t ow = 0; ow < output_width; ow++) {
+      for (const auto oh : c10::irange(output_height)) {
+        for (const auto ow : c10::irange(output_width)) {
           // retrieve position of max
           int64_t index = oh * output_width + ow;
           int64_t maxindex = indices_ptr[index];
@@ -278,17 +279,17 @@ void cpu_max_pool_backward_channels_last(
 
   // parallel on dim N
   at::parallel_for(0, nbatch, 0, [&](int64_t begin, int64_t end) {
-    for (int64_t n = begin; n < end; n++) {
+    for (const auto n : c10::irange(begin, end)) {
       scalar_t* grad_input_ptr = grad_input_data + n * input_height * input_width * channels;
       scalar_t* grad_output_ptr = grad_output_data + n * output_height * output_width * channels;
       int64_t* indices_ptr = indices_data + n * output_height * output_width * channels;
 
-      for (int64_t oh = 0; oh < output_height; oh++) {
-        for (int64_t ow = 0; ow < output_width; ow++) {
+      for (const auto oh : c10::irange(output_height)) {
+        for (const auto ow : c10::irange(output_width)) {
           scalar_t* gout = grad_output_ptr + oh * output_width * channels + ow * channels;
           int64_t* ind = indices_ptr + oh * output_width * channels + ow * channels;
           // TODO: gcc vectorization
-          for (int64_t c = 0; c < channels; c++) {
+          for (const auto c : c10::irange(channels)) {
             int64_t maxindex = ind[c];
             if (maxindex != -1) {
               grad_input_ptr[maxindex * channels + c] += gout[c];
@@ -354,9 +355,7 @@ void max_pool2d_backward_kernel_impl(
 
 } // anonymous namespace
 
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 REGISTER_DISPATCH(max_pool2d_kernel, &max_pool2d_kernel_impl);
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 REGISTER_DISPATCH(max_pool2d_backward_kernel, &max_pool2d_backward_kernel_impl);
 
 }} // at::native

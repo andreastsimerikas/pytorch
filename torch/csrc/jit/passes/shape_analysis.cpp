@@ -1,10 +1,12 @@
 #include <torch/csrc/jit/passes/shape_analysis.h>
 
 #include <c10/util/Exception.h>
+#include <c10/util/irange.h>
 #include <torch/csrc/jit/frontend/error_report.h>
 #include <torch/csrc/jit/ir/alias_analysis.h>
 #include <torch/csrc/jit/ir/constants.h>
 #include <torch/csrc/jit/ir/ir.h>
+#include <torch/csrc/jit/passes/utils/op_registry.h>
 #include <torch/csrc/jit/runtime/exception_message.h>
 #include <torch/csrc/jit/runtime/operator.h>
 
@@ -12,6 +14,7 @@
 
 #include <ATen/DeviceGuard.h>
 #include <ATen/ExpandUtils.h>
+#include <ATen/core/symbol.h>
 
 #include <exception>
 #include <iostream>
@@ -21,6 +24,24 @@
 
 namespace torch {
 namespace jit {
+
+bool mergeTypes(
+    ArrayRef<Value*> lhs,
+    ArrayRef<Value*> rhs,
+    ArrayRef<Value*> outputs) {
+  AT_ASSERT(lhs.size() == rhs.size() && rhs.size() == outputs.size());
+  bool changed = false;
+  for (const auto i : c10::irange(lhs.size())) {
+    auto old_output_type = outputs[i]->type();
+    auto new_type =
+        unifyTypes(lhs[i]->type(), rhs[i]->type(), /*default_to_union=*/true);
+    AT_ASSERT(new_type);
+    outputs[i]->setType(*new_type);
+    if (*old_output_type != *outputs[i]->type())
+      changed = true;
+  }
+  return changed;
+}
 
 namespace prim {
 using namespace ::c10::prim;
@@ -44,18 +65,18 @@ bool isValidArgumentForRunning(Value* v) {
     }
     return !at::isIntegralType(*tt->scalarType(), /*includeBool=*/false);
   }
-  return v->type()->isSubtypeOf(FloatType::get());
+  return v->type()->isSubtypeOf(*FloatType::get());
 }
 
 bool isValidReturnForRunning(Value* v) {
-  return v->type()->isSubtypeOf(TensorType::get()) ||
-      v->type()->isSubtypeOf(NumberType::get());
+  return v->type()->isSubtypeOf(*TensorType::get()) ||
+      v->type()->isSubtypeOf(*NumberType::get());
 }
 
 bool containsTensorType(const TypePtr& t) {
   auto n_contained = t->containedTypes().size();
   if (n_contained == 1) {
-    return t->containedTypes().at(0)->isSubtypeOf(TensorType::get());
+    return t->containedTypes().at(0)->isSubtypeOf(*TensorType::get());
   } else if (n_contained > 1) {
     return std::any_of(
         t->containedTypes().begin(),
@@ -110,7 +131,7 @@ class ShapePropagator {
     // ops which take the result and write to input "out"
     if (auto out_arg_index = n->schema().argumentIndexWithName("out")) {
       auto arg = n->schema().arguments().at(*out_arg_index);
-      return arg.kwarg_only() && arg.type()->isSubtypeOf(TensorType::get());
+      return arg.kwarg_only() && arg.type()->isSubtypeOf(*TensorType::get());
     }
     return false;
   }
@@ -147,12 +168,6 @@ class ShapePropagator {
     return dim;
   }
 
-  // TODO: Would be better to make JIT not assume that CUDA devices
-  // are the only thing that exist.
-  static at::Device jitDeviceIndexToDevice(int device) {
-    return device == -1 ? at::kCPU : at::Device(at::kCUDA, device);
-  }
-
   IValue representativeValue(Value* v) {
     TypePtr type_ = v->type();
     // if the value is actually constant, just use it!
@@ -161,17 +176,16 @@ class ShapePropagator {
     }
     if (TensorTypePtr type = type_->cast<TensorType>()) {
       if (type->isComplete()) {
-        auto attype = type->device()->is_cpu() ? at::CPU(*type->scalarType())
-                                               : at::CUDA(*type->scalarType());
         at::DeviceGuard device_guard(*type->device());
         return at::empty_strided(
                    *type->sizes().concrete_sizes(),
                    *type->strides().concrete_sizes(),
-                   attype.options())
+                   at::TensorOptions(*type->device())
+                       .dtype(*type->scalarType()))
             .zero_();
       }
       // fallthrough
-    } else if (type_->isSubtypeOf(FloatType::get())) {
+    } else if (type_->isSubtypeOf(*FloatType::get())) {
       return 0.f;
     }
     // we should not get here because isValidArgumentForRunning should have
@@ -201,10 +215,10 @@ class ShapePropagator {
     if (schema.is_vararg()) {
       return c10::nullopt;
     }
-    for (size_t i = 0; i < args.size(); ++i) {
-      if (args[i].type()->isSubtypeOf(ListType::ofTensors())) {
+    for (const auto i : c10::irange(args.size())) {
+      if (args[i].type()->isSubtypeOf(*ListType::ofTensors())) {
         return c10::nullopt;
-      } else if (args[i].type()->isSubtypeOf(TensorType::get())) {
+      } else if (args[i].type()->isSubtypeOf(*TensorType::get())) {
         if (auto type = node->input(i)->type()->cast<TensorType>()) {
           if (complete && !type->isComplete()) {
             return c10::nullopt;
@@ -238,7 +252,7 @@ class ShapePropagator {
     c10::ScalarType dimmed = c10::ScalarType::Undefined;
     c10::ScalarType zerodim = c10::ScalarType::Undefined;
     // binary arithmetic ops, more than 2 args is alpha.
-    for (size_t i = 0; i < 2; i++) {
+    for (const auto i : c10::irange(2)) {
       auto dtt = node->inputs()[i]->type()->expect<TensorType>();
       auto inputDtype = dtt->scalarType();
       if (!dtt || !inputDtype) {
@@ -285,7 +299,7 @@ class ShapePropagator {
     for (size_t i = 0; i < lhs.size(); ++i) {
       auto old_output_type = outputs[i]->type();
       auto new_type =
-          unifyTypes(lhs[i]->type(), rhs[i]->type(), /*default_to_any=*/true);
+          unifyTypes(lhs[i]->type(), rhs[i]->type(), /*default_to_union=*/true);
       AT_ASSERT(new_type);
       outputs[i]->setType(*new_type);
       if (*old_output_type != *outputs[i]->type())
@@ -416,10 +430,10 @@ class ShapePropagator {
     // is to uncover any mistakes we could make when editing this code,
     // and eventually it shouldn't matter, because this phase should be
     // preceded by schema checking.
-    op(&stack);
+    op(stack);
 
     AT_ASSERT(stack.size() == node->outputs().size());
-    for (size_t i = 0; i < stack.size(); ++i) {
+    for (const auto i : c10::irange(stack.size())) {
       // some ops may have mixed tensor/primitive outputs
       // for primitives, we don't need to change the type because it is already
       // its most constrained form.
@@ -462,7 +476,7 @@ class ShapePropagator {
         auto tp_sizes = tp->sizes().concrete_sizes().value();
         if (sizes.size() != tp_sizes.size())
           return false;
-        for (int64_t i = 0; i < ndim; ++i) {
+        for (const auto i : c10::irange(ndim)) {
           if (sizes[i] != tp_sizes[i] && i != dim) {
             return false;
           }
@@ -514,7 +528,7 @@ class ShapePropagator {
     }
 
     at::optional<at::ScalarType> default_type =
-        tryScalarTypeFromJitType(input_base_type);
+        tryScalarTypeFromJitType(*input_base_type);
     if (auto grad_index = node->schema().argumentIndexWithName("dtype")) {
       auto inp = toIValue(node->inputs().at(*grad_index));
       if (inp == c10::nullopt) {
@@ -576,7 +590,7 @@ class ShapePropagator {
         // propagate loop-carried input types to block inputs
         auto loop_carried_inputs = node->inputs().slice(2); // skip max, cond
         auto loop_carried_block = body_block->inputs().slice(1); // skip trip
-        for (size_t i = 0; i < loop_carried_inputs.size(); ++i) {
+        for (const auto i : c10::irange(loop_carried_inputs.size())) {
           loop_carried_block[i]->setType(loop_carried_inputs[i]->type());
         }
         auto loop_carried_outputs = body_block->outputs().slice(1); // skip cond
@@ -591,7 +605,7 @@ class ShapePropagator {
         // now that the types are stable, we can insert the expands
         PropagateShapeOnBlock(body_block, /*insert_expands=*/true);
 
-        for (size_t i = 0; i < loop_carried_inputs.size(); ++i) {
+        for (const auto i : c10::irange(loop_carried_inputs.size())) {
           node->outputs()[i]->setType(loop_carried_block[i]->type());
         }
         return;
@@ -605,11 +619,11 @@ class ShapePropagator {
         return; // correct num type is already set
       case prim::NumToTensor: {
         TypePtr typ = node->input()->type();
-        if (typ->isSubtypeOf(IntType::get()) ||
-            typ->isSubtypeOf(BoolType::get())) {
+        if (typ->isSubtypeOf(*IntType::get()) ||
+            typ->isSubtypeOf(*BoolType::get())) {
           node->output()->setType(TensorType::create(
               at::kLong, at::kCPU, 0, /*requires_grad=*/c10::nullopt));
-        } else if (node->input()->type()->isSubtypeOf(FloatType::get())) {
+        } else if (node->input()->type()->isSubtypeOf(*FloatType::get())) {
           node->output()->setType(TensorType::create(
               at::kDouble, at::kCPU, 0, /*requires_grad=*/c10::nullopt));
         }
@@ -620,7 +634,7 @@ class ShapePropagator {
         // as_tensor has an overloaded schema and can either have a tensor or
         // a list as the first input, if the input is a tensor, we delegate
         // the shape propagation in PropagateTensorShapeOnNode
-        if (node->inputs().at(0)->type()->isSubtypeOf(TensorType::get())) {
+        if (node->inputs().at(0)->type()->isSubtypeOf(*TensorType::get())) {
           break;
         }
         return propagateTorchTensorShape(node);
@@ -647,7 +661,7 @@ class ShapePropagator {
         return;
       }
       case prim::Constant: {
-        if (node->output()->type()->isSubtypeOf(TensorType::get())) {
+        if (node->output()->type()->isSubtypeOf(*TensorType::get())) {
           node->output()->inferTypeFrom(node->t(attr::value));
         }
         return;
@@ -656,7 +670,7 @@ class ShapePropagator {
         // If we have specialized the optional type to the element type,
         // we want to pass it down. We write this as input.isSubtypeOf(output)
         // to be sure that we don't screw up nested optionals.
-        if (node->input()->type()->isSubtypeOf(node->output()->type())) {
+        if (node->input()->type()->isSubtypeOf(*node->output()->type())) {
           node->output()->setType(node->input()->type());
         }
         return;
@@ -697,7 +711,7 @@ class ShapePropagator {
         // If we have specialized the optional type to the element type,
         // we want to pass it down. We write this as input.isSubtypeOf(output)
         // to be sure that we don't screw up nested optionals.
-        if (node->input()->type()->isSubtypeOf(node->output()->type())) {
+        if (node->input()->type()->isSubtypeOf(*node->output()->type())) {
           node->output()->setType(node->input()->type());
         }
         return;
@@ -859,7 +873,7 @@ class ShapePropagator {
             "aten::normal(float mean, Tensor std, *, Generator? generator) -> Tensor",
             "aten::normal(Tensor mean, float std, *, Generator? generator) -> Tensor",
             "aten::permute(Tensor self, int[] dims) -> Tensor",
-            "aten::pin_memory(Tensor(a) self) -> Tensor(a)",
+            "aten::pin_memory(Tensor(a) self, Device? device=None) -> Tensor(a)",
             "aten::pinverse(Tensor self, float rcond) -> Tensor",
             "aten::reciprocal(Tensor self) -> Tensor",
             "aten::relu(Tensor self) -> Tensor",
@@ -884,7 +898,7 @@ class ShapePropagator {
             "aten::trunc(Tensor self) -> Tensor",
             "aten::rot90(Tensor self, int k, int[] dims) -> Tensor",
             "aten::narrow(Tensor self, int dim, int start, int length) -> Tensor",
-            "aten::slice(Tensor self, int dim, int? start=0, int? end=9223372036854775807, int step=1) -> Tensor",
+            "aten::slice(Tensor self, int dim, int? start=None, int? end=None, int step=1) -> Tensor",
             "aten::alias(Tensor self) -> Tensor",
         },
         [](Node* node) -> type_vec_t {
@@ -1022,7 +1036,7 @@ class ShapePropagator {
           if (auto maybe_tensor_types = gatherTensorTypes(node)) {
             auto first_scalar_type = (*maybe_tensor_types)[0]->scalarType();
             auto second_scalar_type =
-                tryScalarTypeFromJitType(node->inputs()[1]->type());
+                tryScalarTypeFromJitType(*node->inputs()[1]->type());
             if (!first_scalar_type || !second_scalar_type) {
               return {};
             }
@@ -1142,53 +1156,8 @@ class ShapePropagator {
           return {};
         }};
 
-    // Requirements:
-    //   dims           : preserved from the first argument
-    //   scalar type    : preserved from the first argument (doesn't have to
-    //   match other arguments) device         : always matching and preserved
-    //   tensor inputs  : *
-    //   tensor outputs : 1
-    // NB: those ops (with slight adjustments) are good candidates for restarts.
-    //     Knowing the type and device of weights or biases is usually enough to
-    //     infer the output type.
-    static const register_formula_for nn_ops_first_input_preserving{
-        {
-            "aten::batch_norm(Tensor input, Tensor? weight, Tensor? bias, Tensor? running_mean, Tensor? running_var, bool training, float momentum, float eps, bool cudnn_enabled) -> Tensor",
-            "aten::conv1d(Tensor input, Tensor weight, Tensor? bias, int[] stride, int[] padding, int[] dilation, int groups) -> Tensor",
-            "aten::conv2d(Tensor input, Tensor weight, Tensor? bias, int[] stride, int[] padding, int[] dilation, int groups) -> Tensor",
-            "aten::conv3d(Tensor input, Tensor weight, Tensor? bias, int[] stride, int[] padding, int[] dilation, int groups) -> Tensor",
-            "aten::conv_tbc(Tensor self, Tensor weight, Tensor bias, int pad) -> Tensor",
-            "aten::conv_transpose1d(Tensor input, Tensor weight, Tensor? bias, int[] stride, int[] padding, int[] output_padding, int groups, int[] dilation) -> Tensor",
-            "aten::conv_transpose2d(Tensor input, Tensor weight, Tensor? bias, int[] stride, int[] padding, int[] output_padding, int groups, int[] dilation) -> Tensor",
-            "aten::conv_transpose3d(Tensor input, Tensor weight, Tensor? bias, int[] stride, int[] padding, int[] output_padding, int groups, int[] dilation) -> Tensor",
-            "aten::convolution(Tensor input, Tensor weight, Tensor? bias, int[] stride, int[] padding, int[] dilation, bool transposed, int[] output_padding, int groups) -> Tensor",
-            "aten::_convolution(Tensor input, Tensor weight, Tensor? bias, int[] stride, int[] padding, int[] dilation, bool transposed, int[] output_padding, int groups, bool benchmark, bool deterministic, bool cudnn_enabled) -> Tensor", // deprecated _convolution
-            "aten::_convolution(Tensor input, Tensor weight, Tensor? bias, int[] stride, int[] padding, int[] dilation, bool transposed, int[] output_padding, int groups, bool benchmark, bool deterministic, bool cudnn_enabled, bool allow_tf32) -> Tensor",
-            "aten::adaptive_avg_pool1d(Tensor self, int[] output_size) -> Tensor",
-            "aten::adaptive_avg_pool2d(Tensor self, int[] output_size) -> Tensor",
-            "aten::adaptive_avg_pool3d(Tensor self, int[] output_size) -> Tensor",
-            "aten::avg_pool1d(Tensor self, int[] kernel_size, int[] stride, int[] padding, bool ceil_mode, bool count_include_pad) -> Tensor",
-            "aten::avg_pool2d(Tensor self, int[] kernel_size, int[] stride, int[] padding, bool ceil_mode, bool count_include_pad, int? divisor_override) -> Tensor",
-            "aten::avg_pool3d(Tensor self, int[] kernel_size, int[] stride, int[] padding, bool ceil_mode, bool count_include_pad, int? divisor_override) -> Tensor",
-            "aten::max_pool1d(Tensor self, int[] kernel_size, int[] stride, int[] padding, int[] dilation, bool ceil_mode) -> Tensor",
-            "aten::max_pool2d(Tensor self, int[] kernel_size, int[] stride, int[] padding, int[] dilation, bool ceil_mode) -> Tensor",
-            "aten::max_pool3d(Tensor self, int[] kernel_size, int[] stride, int[] padding, int[] dilation, bool ceil_mode) -> Tensor",
-            "aten::max_unpool2d(Tensor self, Tensor indices, int[] output_size) -> Tensor",
-            "aten::max_unpool3d(Tensor self, Tensor indices, int[] output_size, int[] stride, int[] padding) -> Tensor",
-            "aten::reflection_pad1d(Tensor self, int[] padding) -> Tensor",
-            "aten::reflection_pad2d(Tensor self, int[] padding) -> Tensor",
-            "aten::replication_pad1d(Tensor self, int[] padding) -> Tensor",
-            "aten::replication_pad2d(Tensor self, int[] padding) -> Tensor",
-            "aten::replication_pad3d(Tensor self, int[] padding) -> Tensor",
-            "aten::upsample_bilinear2d(Tensor self, int[] output_size, bool align_corners, float? scales_h, float? scales_w) -> Tensor",
-            "aten::upsample_linear1d(Tensor self, int[] output_size, bool align_corners, float? scales) -> Tensor",
-            "aten::upsample_nearest1d(Tensor self, int[] output_size, float? scales) -> Tensor",
-            "aten::upsample_nearest2d(Tensor self, int[] output_size, float? scales_h, float? scales_w) -> Tensor",
-            "aten::upsample_nearest3d(Tensor self, int[] output_size, float? scales_d, float? scales_h, float? scales_w) -> Tensor",
-            "aten::upsample_trilinear3d(Tensor self, int[] output_size, bool align_corners, float? scales_d, float? scales_h, float? scales_w) -> Tensor",
-            "aten::prelu(Tensor self, Tensor weight) -> Tensor",
-        },
-        [](Node* node) -> type_vec_t {
+    static const register_formula_for nn_ops_first_input_formula{
+        *nn_ops_first_input_preserving(), [](Node* node) -> type_vec_t {
           if (auto type = node->input(0)->type()->cast<TensorType>()) {
             return {type->dimensionedOnly()};
           }
@@ -1596,8 +1565,8 @@ class ShapePropagator {
         } else {
           auto outputs = node->outputs();
           AT_ASSERT(types.size() == outputs.size());
-          for (size_t i = 0; i < types.size(); ++i) {
-            AT_ASSERT(outputs[i]->type()->isSubtypeOf(TensorType::get()));
+          for (const auto i : c10::irange(types.size())) {
+            AT_ASSERT(outputs[i]->type()->isSubtypeOf(*TensorType::get()));
             outputs[i]->setType(types[i]);
           }
           return true;
@@ -1933,7 +1902,7 @@ class ShapePropagator {
         node->matches("aten::mul(Tensor self, Scalar other) -> Tensor")) {
       auto first_scalar_type = (tensor_types)[0]->scalarType();
       auto second_scalar_type =
-          tryScalarTypeFromJitType(node->inputs()[1]->type());
+          tryScalarTypeFromJitType(*node->inputs()[1]->type());
       if (!first_scalar_type || !second_scalar_type) {
         return false;
       }
@@ -2075,7 +2044,7 @@ class ShapePropagator {
       // NOLINTNEXTLINE(cppcoreguidelines-init-variables)
       size_t inferred_idx;
       int64_t size_product = 1;
-      for (size_t i = 0; i < sizes.size(); ++i) {
+      for (const auto i : c10::irange(sizes.size())) {
         if (sizes.get(i) == -1) {
           if (inferred)
             throw propagation_error();
@@ -2181,7 +2150,7 @@ using TypeCache = std::unordered_map<TypePtr, TypePtr>;
 TypePtr getOrCreateUnshapedType(TypePtr type, TypeCache& unshaped_type_cache);
 
 TypePtr unshapedTypeImpl(TypePtr type, TypeCache& unshaped_type_cache) {
-  if (type->isSubtypeOf(TensorType::get())) {
+  if (type->isSubtypeOf(*TensorType::get())) {
     return TensorType::get();
   }
   std::vector<TypePtr> unshaped_contained_types;

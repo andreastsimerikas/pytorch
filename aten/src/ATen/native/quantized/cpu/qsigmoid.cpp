@@ -7,6 +7,7 @@
 #include <ATen/native/quantized/cpu/quantized_ops.h>
 #include <ATen/native/quantized/cpu/init_qnnpack.h>
 #include <ATen/native/quantized/cpu/qnnpack_utils.h>
+#include <c10/util/irange.h>
 #include <caffe2/utils/threadpool/pthreadpool-cpp.h>
 
 #include <algorithm>
@@ -14,7 +15,6 @@
 namespace at {
 namespace native {
 
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 DEFINE_DISPATCH(qsigmoid_stub);
 
 #ifdef USE_PYTORCH_QNNPACK
@@ -27,7 +27,7 @@ Tensor qnnpack_sigmoid(
 
   Tensor input_contig = input.contiguous(input.suggest_memory_format());
   size_t num_elems = 1;
-  for (int i = 1; i < input_contig.ndimension(); ++i) {
+  for (const auto i : c10::irange(1, input_contig.ndimension())) {
     num_elems *= input_contig.size(i);
   }
 
@@ -101,12 +101,10 @@ Tensor sigmoid_quantized_cpu(const Tensor& qx) {
     // - For unsigned types output zero point is set to (qmax + qmin) / 2.0
     // See https://stackoverflow.com/a/34448562/3606192 for potential
     // optimizations
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     double output_scale = 0.00390625;  // 1.0 / 2^8
     int64_t output_zero_point = 0;
     // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
     if (SCALAR_TYPE == at::kQInt32) {
-      // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
       output_scale = 2.3283064365386963e-10;  // 1.0 / 2^32
     } else if (SCALAR_TYPE == at::kQInt8) {
       output_zero_point = -128;

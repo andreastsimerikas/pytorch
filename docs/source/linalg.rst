@@ -6,10 +6,6 @@ torch.linalg
 
 Common linear algebra operations.
 
-This module is in BETA. New functions are still being added, and some
-functions may change in future PyTorch releases. See the documentation of each
-function for details.
-
 .. automodule:: torch.linalg
 .. currentmodule:: torch.linalg
 
@@ -22,6 +18,7 @@ Matrix Properties
 
     norm
     vector_norm
+    matrix_norm
     det
     slogdet
     cond
@@ -51,6 +48,7 @@ Solvers
     :nosignatures:
 
     solve
+    solve_triangular
     lstsq
 
 Inverses
@@ -63,6 +61,16 @@ Inverses
     inv
     pinv
 
+Matrix Functions
+----------------
+
+.. autosummary::
+    :toctree: generated
+    :nosignatures:
+
+    matrix_exp
+    matrix_power
+
 Matrix Products
 ---------------
 
@@ -70,7 +78,8 @@ Matrix Products
     :toctree: generated
     :nosignatures:
 
-    matrix_power
+    cross
+    matmul
     multi_dot
     householder_product
 
@@ -91,3 +100,4 @@ Experimental Functions
     :nosignatures:
 
     cholesky_ex
+    inv_ex

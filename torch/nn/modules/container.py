@@ -7,7 +7,7 @@ import torch
 from .module import Module
 from torch._jit_internal import _copy_to_script_wrapper
 
-from typing import Any, Iterable, Iterator, Mapping, Optional, TYPE_CHECKING, overload, Tuple, TypeVar, Union
+from typing import Any, Dict, Iterable, Iterator, Mapping, Optional, TYPE_CHECKING, overload, Tuple, TypeVar, Union
 
 if TYPE_CHECKING:
     from torch.nn import Parameter
@@ -70,6 +70,8 @@ class Sequential(Module):
                   ('relu2', nn.ReLU())
                 ]))
     """
+
+    _modules: Dict[str, Module]  # type: ignore[assignment]
 
     @overload
     def __init__(self, *args: Module) -> None:
@@ -164,6 +166,8 @@ class ModuleList(Module):
                 return x
     """
 
+    _modules: Dict[str, Module]  # type: ignore[assignment]
+
     def __init__(self, modules: Optional[Iterable[Module]] = None) -> None:
         super(ModuleList, self).__init__()
         if modules is not None:
@@ -179,7 +183,7 @@ class ModuleList(Module):
         return str(idx)
 
     @_copy_to_script_wrapper
-    def __getitem__(self, idx: int) -> Module:
+    def __getitem__(self, idx: int) -> Union[Module, 'ModuleList']:
         if isinstance(idx, slice):
             return self.__class__(list(self._modules.values())[idx])
         else:
@@ -296,6 +300,8 @@ class ModuleDict(Module):
                 x = self.activations[act](x)
                 return x
     """
+
+    _modules: Dict[str, Module]  # type: ignore[assignment]
 
     def __init__(self, modules: Optional[Mapping[str, Module]] = None) -> None:
         super(ModuleDict, self).__init__()
@@ -418,6 +424,8 @@ class ParameterList(Module):
                     x = self.params[i // 2].mm(x) + p.mm(x)
                 return x
     """
+
+    _parameters: Dict[str, 'Parameter']  # type: ignore[assignment]
 
     def __init__(self, parameters: Optional[Iterable['Parameter']] = None) -> None:
         super(ParameterList, self).__init__()
@@ -561,6 +569,8 @@ class ParameterDict(Module):
                 return x
     """
 
+    _parameters: Dict[str, 'Parameter']  # type: ignore[assignment]
+
     def __init__(self, parameters: Optional[Mapping[str, 'Parameter']] = None) -> None:
         super(ParameterDict, self).__init__()
         self._initialized = True
@@ -593,8 +603,30 @@ class ParameterDict(Module):
     def __iter__(self) -> Iterator[str]:
         return iter(self._parameters.keys())
 
+    def __reversed__(self) -> Iterator[str]:
+        return reversed(list(self._parameters.keys()))
+
+    def copy(self) -> 'ParameterDict':
+        """Returns a copy of this :class:`~torch.nn.ParameterDict` instance.
+        """
+        return ParameterDict(self._parameters.copy())
+
     def __contains__(self, key: str) -> bool:
         return key in self._parameters
+
+    def setdefault(self, key: str, default: Optional['Parameter'] = None) -> 'Parameter':
+        """If key is in the ParameterDict, return its parameter.
+        If not, insert `key` with a parameter `default` and return `default`.
+        `default` defaults to `None`.
+
+        Args:
+            key (string): key to set default for
+            default (:class:`~torch.nn.Parameter`): the parameter set to the key
+        """
+        if key in self._parameters:
+            return self._parameters[key]
+        self[key] = default  # type: ignore[assignment]
+        return self._parameters[key]
 
     def clear(self) -> None:
         """Remove all items from the ParameterDict.
@@ -610,6 +642,31 @@ class ParameterDict(Module):
         v = self[key]
         del self[key]
         return v
+
+    def popitem(self) -> Tuple[str, 'Parameter']:
+        """Remove and return the last inserted `(key, parameter)` pair
+        from the ParameterDict
+        """
+        return self._parameters.popitem()
+
+    def get(self, key: str, default: Optional['Parameter'] = None) -> 'Parameter | None':
+        r"""Return the parameter associated with key if present.
+        Otherwise return default if provided, None if not.
+
+        Args:
+            key (string): key to get from the ParameterDict
+            default (Parameter, optional): value to return if key not present
+        """
+        return self._parameters.get(key, default)
+
+    def fromkeys(self, keys: Iterable['str'], default: Optional['Parameter'] = None) -> 'ParameterDict':
+        r"""Return a new ParameterDict with the keys provided
+
+        Args:
+            keys (iterable, string): keys to make the new ParameterDict from
+            default (Parameter, optional): value to set for all keys
+        """
+        return ParameterDict(self._parameters.fromkeys(keys, default))  # type: ignore[arg-type]
 
     def keys(self) -> Iterable[str]:
         r"""Return an iterable of the ParameterDict keys.
@@ -683,3 +740,17 @@ class ParameterDict(Module):
                       "on each GPU except the original one.")
 
         return super(ParameterDict, self)._replicate_for_data_parallel()
+
+    def __or__(self, other: 'ParameterDict') -> 'ParameterDict':
+        copy = self.copy()
+        copy.update(other._parameters)
+        return copy
+
+    def __ror__(self, other: 'ParameterDict') -> 'ParameterDict':
+        copy = other.copy()
+        copy.update(self._parameters)
+        return copy
+
+    def __ior__(self, other : 'ParameterDict') -> 'ParameterDict':
+        self.update(other._parameters)
+        return self

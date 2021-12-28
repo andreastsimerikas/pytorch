@@ -2,7 +2,7 @@
 
 #include <torch/csrc/DynamicTypes.h>
 #include <torch/csrc/Exceptions.h>
-#include <torch/csrc/THP_export.h>
+#include <torch/csrc/Export.h>
 #include <torch/csrc/autograd/function.h>
 #include <torch/csrc/autograd/python_variable.h>
 #include <torch/csrc/autograd/utils/wrap_outputs.h>
@@ -212,6 +212,9 @@ static inline bool treatSequenceAsTuple(PyObject* index) {
   if (PyTuple_Check(index)) {
     return true;
   }
+  if (THPVariable_Check(index)) {
+    return false;
+  }
   if (!PySequence_Check(index)) {
     return false;
   }
@@ -370,6 +373,8 @@ int THPVariable_setitem(PyObject* self, PyObject* index, PyObject* py_value) {
   // TODO: This qint special case looks very suspicious...
   if (isQIntType(self_.scalar_type())) {
     value = valueToTensor(device(kCPU).dtype(kFloat), py_value, at::Device(kCPU));
+  } else if (self_device.is_cuda()) {
+    value = valueToTensor(self_.options(), py_value, at::Device(kCPU));
   } else {
     value = valueToTensor(self_.options(), py_value, self_device);
   }

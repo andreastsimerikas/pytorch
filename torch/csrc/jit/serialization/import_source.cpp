@@ -159,7 +159,7 @@ void SourceImporterImpl::parseSourceIfNeeded(const std::string& qualifier) {
     return;
   }
   loaded_sources_.insert(qualifier);
-  std::shared_ptr<SourceView> src = source_loader_(qualifier);
+  std::shared_ptr<Source> src = source_loader_(qualifier);
 
   // The importer, when looking for classes/functions doesn't know if 'foo'
   // contains definitions or if it is a prefix of 'foo.bar', we only figure it
@@ -577,7 +577,9 @@ void SourceImporterImpl::importClass(
       /*propResolvers=*/{},
       methods,
       method_resolvers,
-      &self);
+      &self,
+      /*shouldMangle=*/false,
+      /*operator_set_version=*/version_);
   cu_->define_hooks(
       qualified_classname,
       hooks,

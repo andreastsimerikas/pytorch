@@ -292,7 +292,7 @@ void MKLDNNLayerNormOp(Stack& stack, bool inplace) {
   TORCH_INTERNAL_ASSERT(weight_ival.isTensor());
   weight = weight_ival.toTensor();
 
-  auto shape = pop(stack).toIntVector();
+  auto shape = pop(stack).toDimVector();
   auto input = pop(stack).toTensor();
 
   at::Tensor dst, mean, rstd;
@@ -987,6 +987,7 @@ class MKLDNNSubgraphSlicer {
       case aten::relu:
       case aten::relu6:
       case aten::gelu:
+      case aten::prelu:
       case aten::sigmoid:
       case aten::hardsigmoid:
       case aten::hardswish:

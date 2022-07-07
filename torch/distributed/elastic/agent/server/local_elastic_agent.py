@@ -28,6 +28,7 @@ from torch.distributed.elastic.utils.logging import get_logger
 
 log = get_logger()
 
+__all__ = ['LocalElasticAgent']
 
 class LocalElasticAgent(SimpleElasticAgent):
     """
@@ -156,10 +157,13 @@ class LocalElasticAgent(SimpleElasticAgent):
                 "TORCHELASTIC_MAX_RESTARTS": str(spec.max_restarts),
                 "TORCHELASTIC_RUN_ID": spec.rdzv_handler.get_run_id(),
                 "TORCHELASTIC_USE_AGENT_STORE": str(use_agent_store),
-                "NCCL_ASYNC_ERROR_HANDLING": str(1),
+                "NCCL_ASYNC_ERROR_HANDLING": os.getenv(
+                    "NCCL_ASYNC_ERROR_HANDLING", str(1)
+                ),
             }
             if "OMP_NUM_THREADS" in os.environ:
                 worker_env["OMP_NUM_THREADS"] = os.environ["OMP_NUM_THREADS"]
+
             envs[local_rank] = worker_env
             worker_args = list(spec.args)
             worker_args = macros.substitute(worker_args, str(local_rank))

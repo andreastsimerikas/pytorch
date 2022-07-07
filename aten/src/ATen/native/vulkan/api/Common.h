@@ -7,13 +7,13 @@
 #ifdef USE_VULKAN_SHADERC_RUNTIME
 #include <ATen/native/vulkan/glsl.h>
 #define VK_KERNEL(name)                          \
-  ::at::native::vulkan::api::Shader::Descriptor{ \
+  ::at::native::vulkan::api::ShaderSource{ \
     name##_glsl,                                 \
   }
 #else
 #include <ATen/native/vulkan/spv.h>
 #define VK_KERNEL(name)                          \
-  ::at::native::vulkan::api::Shader::Descriptor{ \
+  ::at::native::vulkan::api::ShaderSource{ \
     name##_spv,                                  \
     name##_spv_len,                              \
   }
@@ -32,7 +32,11 @@
 #define VK_CHECK(function)                                  \
   do {                                                      \
     const VkResult result = (function);                     \
-    TORCH_CHECK(VK_SUCCESS == result, "VkResult:", result); \
+    TORCH_CHECK(                                            \
+        VK_SUCCESS == result,                               \
+        C10_STRINGIZE(__FILE__), " [",                      \
+        C10_STRINGIZE(__LINE__), "] "                       \
+        "VkResult:", result);                               \
   } while (false)
 
 #define VK_CHECK_RELAXED(function)                          \
@@ -61,18 +65,19 @@ namespace native {
 namespace vulkan {
 namespace api {
 
-struct Adapter;
+class Adapter;
 struct Command;
 class Context;
 struct Descriptor;
 struct Pipeline;
 struct Resource;
 class Runtime;
-struct Shader;
 
 struct GPU final {
+  VkInstance instance;
   const Adapter* adapter;
   VkDevice device;
+  uint32_t queue_family_index;
   VkQueue queue;
 };
 

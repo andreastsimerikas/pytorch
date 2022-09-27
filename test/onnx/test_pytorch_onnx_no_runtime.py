@@ -807,7 +807,7 @@ class TestONNXExport(common_utils.TestCase):
         self.assertEqual(onnx_model.graph.node[-1].domain, "")
         self.assertEqual(len(onnx_model.graph.node[-1].input), 3)
         self.assertEqual(onnx_model.graph.node[-1].attribute[0].name, "dilations")
-        self.assertEqual(onnx_model.graph.node[-1].attribute[1].name, "padding")
+        self.assertEqual(onnx_model.graph.node[-1].attribute[1].name, "pads")
         self.assertEqual(onnx_model.graph.node[-1].attribute[2].name, "strides")
 
 

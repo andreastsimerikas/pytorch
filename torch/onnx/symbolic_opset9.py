@@ -428,9 +428,8 @@ def _trunc_divide(g: jit_utils.GraphContext, self, other):
     # - if self is not fp and other is fp, the output is of type "Float"
     # - self is not fp and other is not fp, the output's type is self's output type
     # - the output type defaults to Float
-    scalar_type = _type_utils.JitScalarType.from_value(self, raises=False)
-
-    if scalar_type is not None:
+    try:
+        scalar_type = _type_utils.JitScalarType.from_value(self)
         if not symbolic_helper._is_fp(self) and symbolic_helper._is_fp(other):
             out = g.op("Cast", out, to_i=_C_onnx.TensorProtoDataType.FLOAT)
         else:
@@ -439,7 +438,7 @@ def _trunc_divide(g: jit_utils.GraphContext, self, other):
                 out,
                 to_i=scalar_type.onnx_type(),
             )
-    else:
+    except errors.OnnxExporterError:
         out = g.op("Cast", out, to_i=_C_onnx.TensorProtoDataType.FLOAT)
     return out
 
@@ -713,12 +712,14 @@ def _slice(g: jit_utils.GraphContext, input, axes, starts, ends):
 
 @_beartype.beartype
 def _maybe_cast_reduce_op_input(g: jit_utils.GraphContext, self):
-    dtype = _type_utils.JitScalarType.from_value(self, raises=False)
-    # This check only covers traced modules where dtype is present
-    if dtype is not None:
+    try:
+        dtype = _type_utils.JitScalarType.from_value(self)
+        # This check only covers traced modules where dtype is present
         # pytorch reduce-ops cast all other integral types to int64
         if not symbolic_helper._is_fp(self) and not (dtype.scalar_name() == "Long"):
             self = _cast_Long(g, self, False)  # type: ignore[name-defined]
+    except errors.OnnxExporterError:
+        pass
     return self
 
 
@@ -3806,8 +3807,9 @@ def tanhshrink(g: jit_utils.GraphContext, self):
 @symbolic_helper.parse_args("v", "f")
 @_beartype.beartype
 def hardshrink(g: jit_utils.GraphContext, self, lambd):
-    scalar_type = _type_utils.JitScalarType.from_value(self, raises=False)
-    if scalar_type is None:
+    try:
+        scalar_type = _type_utils.JitScalarType.from_value(self)
+    except errors.OnnxExporterError:
         scalar_type = _type_utils.JitScalarType.FLOAT
     lambd_op = g.op(
         "Constant",
@@ -3829,8 +3831,9 @@ def hardshrink(g: jit_utils.GraphContext, self, lambd):
 @symbolic_helper.parse_args("v", "f")
 @_beartype.beartype
 def softshrink(g: jit_utils.GraphContext, self, lambd):
-    scalar_type = _type_utils.JitScalarType.from_value(self, raises=False)
-    if scalar_type is None:
+    try:
+        scalar_type = _type_utils.JitScalarType.from_value(self)
+    except errors.OnnxExporterError:
         scalar_type = _type_utils.JitScalarType.FLOAT
     lambd_op = g.op(
         "Constant",
@@ -4867,11 +4870,13 @@ def bernoulli(g: jit_utils.GraphContext, input, generator=None, out=None):
             "Bernoulli", "generator is not supported for bernoulli", input
         )
 
-    dtype = _type_utils.JitScalarType.from_value(input, raises=False)
-    if dtype is None:
+    try:
+        dtype = _type_utils.JitScalarType.from_value(input)
+    except errors.OnnxExporterError:
         return symbolic_helper._unimplemented(
             "Bernoulli", "input dtype not accessible", input
         )
+
     p = g.op(
         "RandomUniformLike",
         input,
@@ -6094,8 +6099,9 @@ def movedim(g: jit_utils.GraphContext, self, source, destination):
 @symbolic_helper.parse_args("v", "v")
 @_beartype.beartype
 def fill(g: jit_utils.GraphContext, self, value):
-    scalar_type = _type_utils.JitScalarType.from_value(self, raises=False)
-    if scalar_type is None:
+    try:
+        scalar_type = _type_utils.JitScalarType.from_value(self)
+    except errors.OnnxExporterError:
         scalar_type = _type_utils.JitScalarType.FLOAT
 
     return full_like(g, self, value, scalar_type)

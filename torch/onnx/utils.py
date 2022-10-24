@@ -1597,6 +1597,14 @@ def _export(
                     model_file_location,
                     node_attr_to_name,
                 )
+            # proto is None when model > 2GB
+            proto = _add_onnxscript_fn(
+                proto,
+                graph,
+                custom_opsets,
+                val_use_external_data_format,
+                model_file_location,
+            )
             if verbose:
                 torch.onnx.log("Exported graph: ", graph)
             if export_type == _exporter_states.ExportTypes.PROTOBUF_FILE:
@@ -1658,6 +1666,60 @@ def _export(
         _reset_trace_module_map()
 
     return torch_out
+
+
+@_beartype.beartype
+def _add_onnxscript_fn(
+    model_bytes: bytes,
+    graph: _C.Graph,
+    custom_opsets: Mapping[str, int],
+    val_use_external_data_format: bool,
+    model_file_location: str,
+) -> Optional[bytes]:
+    """Insert model-included custom onnx-script function into ModelProto"""
+
+    # TODO(titaiwang): remove this when onnx becomes dependency
+    try:
+        import onnx
+    except Exception:
+        raise errors.OnnxExporterError("Module onnx is not installed!")
+
+    onnx_function_list = list()
+    # Iterate graph nodes to insert only the included custom
+    # function_proto into model_proto
+    for node in graph.nodes():
+        domain, opname = jit_utils._parse_node_kind(node.kind())
+        if jit_utils._is_custom_domain(domain):
+            specified_version = custom_opsets.get(domain, 1)
+            onnx_function_group = registration.registry.get_function_group(node.kind())
+            if onnx_function_group is not None:
+                onnx_fn = onnx_function_group.get(specified_version)
+                if onnx_fn is not None:
+                    # TODO: to_function_proto is onnx-script API and can be annotated
+                    # after onnx-script is dependency
+                    onnx_function_list.append(onnx_fn.to_function_proto())  # type: ignore[attr-defined]
+                    continue
+
+            raise errors.UnsupportedOperatorError(
+                domain,
+                opname,
+                specified_version,
+                onnx_function_group.get_min_supported()
+                if onnx_function_group
+                else None,
+            )
+    if onnx_function_list:
+        # For > 2GB model, we need to load from file
+        # Otherwise, we load from IO
+        if val_use_external_data_format:
+            model_proto = onnx.load(model_file_location)
+            model_proto.functions.extend(onnx_function_list)
+            onnx.save(model_proto, model_file_location)
+        else:
+            model_proto = onnx.load_model_from_string(model_bytes)
+            model_proto.functions.extend(onnx_function_list)
+            model_bytes = model_proto.SerializeToString()
+    return model_bytes
 
 
 @_beartype.beartype
@@ -1940,7 +2002,9 @@ def _verify_custom_op_name(symbolic_name: str):
 
 @_beartype.beartype
 def register_custom_op_symbolic(
-    symbolic_name: str, symbolic_fn: Callable, opset_version: int
+    symbolic_name: str,
+    symbolic_fn: Callable,
+    opset_version: int,
 ):
     """Registers a symbolic function for a custom operator.
 

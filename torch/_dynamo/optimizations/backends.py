@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 
 import numpy as np
+import time
 
 import torch
 
@@ -768,7 +769,6 @@ def ltc_reuse_graph(gm: torch.fx.GraphModule, example_inputs):
     ltc = _init_ltc()
     return ltc.extract_compiled_graph.extract_compiled_graph(gm, example_inputs)
 
-
 def ltc_trivial(gm: torch.fx.GraphModule, example_inputs):
     ltc = _init_ltc()
     lazy_model = copy.deepcopy(gm).to(device="lazy")
@@ -783,6 +783,40 @@ def ltc_trivial(gm: torch.fx.GraphModule, example_inputs):
         return out
 
     return ltc_model
+
+@functools.lru_cache(None)
+def _init_torchxla():
+    try:
+        import torch_xla.core.xla_model as xm
+        import torch_xla
+        return torch_xla
+    except ModuleNotFoundError as e:
+        print(f"torchxla backend fails. Can not import {e.name}")
+        raise
+
+@create_backend
+def torchxla_trivial(subgraph):
+    thxla = _init_torchxla()
+    xm = thxla.core.xla_model
+
+    xla_dev = xm.xla_device()
+
+    xla_model = copy.deepcopy(subgraph.model).to(device=xla_dev)
+    def xla_model_wrapper(*inputs):
+        orig_device = inputs[0].device if len(inputs) > 0 else "cpu"
+        xla_inputs = tuple(inp.to(device=xla_dev) for inp in inputs)
+
+        xla_out = xla_model(*xla_inputs)
+        result = tuple(out.to(device=orig_device) for out in xla_out)
+        return result
+    return xla_model_wrapper
+
+@create_backend
+def torchxla_reuse_graph(subgraph):
+    import torch._dynamo.optimizations.torchxla_integration as integration
+    model = subgraph.model
+    example_inputs = subgraph.example_inputs
+    return integration.extract_compiled_graph(model, example_inputs)
 
 
 def ipex_fp32(gm: torch.fx.GraphModule, example_inputs):

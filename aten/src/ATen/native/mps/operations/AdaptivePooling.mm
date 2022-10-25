@@ -259,12 +259,13 @@ TORCH_IMPL_FUNC(adaptive_max_pool2d_out_mps)
 
 TORCH_IMPL_FUNC(adaptive_max_pool2d_backward_out_mps)
   (const Tensor& gradOutput,
-   const Tensor& input,
+   IntArrayRef input_sizes,
    const Tensor& indices,
    const Tensor& gradInput) {
 
-  int64_t isizeH = input.size(-2);
-  int64_t isizeW = input.size(-1);
+  const int64_t ndim = input_sizes.size();
+  int64_t isizeH = input_sizes[ndim - 2];
+  int64_t isizeW = input_sizes[ndim - 1];
   int64_t osizeH = gradOutput.size(-2);
   int64_t osizeW = gradOutput.size(-1);
 
@@ -276,7 +277,7 @@ TORCH_IMPL_FUNC(adaptive_max_pool2d_backward_out_mps)
                     kernel_sizeH, kernel_sizeW);
 
   auto returnGradInput = at::max_pool2d_with_indices_backward(gradOutput,
-                                                              input,
+                                                              input_sizes,
                                                               IntArrayRef({kernel_sizeH, kernel_sizeW}),
                                                               IntArrayRef({strideH, strideW}),
                                                               IntArrayRef({0, 0}),

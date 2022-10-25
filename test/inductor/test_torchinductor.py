@@ -3451,7 +3451,7 @@ class CommonTemplate:
     def test_max_pool2d_with_indices_backward(self):
         def fn(a, b, c):
             return aten.max_pool2d_with_indices_backward(
-                a, b, [2, 2], [2, 2], [0, 0], [1, 1], False, c
+                a, b.sizes(), [2, 2], [2, 2], [0, 0], [1, 1], False, c
             )
 
         x = torch.randn([2, 4, 18, 14])
@@ -3476,7 +3476,7 @@ class CommonTemplate:
     def test_max_pool2d_with_indices_backward2(self):
         def fn(a, b, c):
             return aten.max_pool2d_with_indices_backward(
-                a, b, [3, 3], [2, 2], [1, 1], [1, 1], True, c
+                a, b.sizes(), [3, 3], [2, 2], [1, 1], [1, 1], True, c
             )
 
         x = torch.randn([2, 4, 40, 56])
@@ -3502,7 +3502,7 @@ class CommonTemplate:
     def test_max_pool2d_with_indices_backward3(self):
         def fn(a, b, c):
             return aten.max_pool2d_with_indices_backward(
-                a, b, [1, 1], [2, 2], [0, 0], [1, 1], False, c
+                a, b.sizes(), [1, 1], [2, 2], [0, 0], [1, 1], False, c
             )
 
         x = torch.randn([32, 256, 37, 38])

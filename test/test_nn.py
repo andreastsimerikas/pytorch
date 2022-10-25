@@ -12706,7 +12706,7 @@ class TestNNDeviceType(NNTestCase):
             self.assertEqual(m.weight.grad.data,
                              torch.cat([m1.weight.grad.data,
                                         m2.weight.grad.data], 0),
-                             atol=dtype2prec_DONTUSE[dtype], rtol=0)
+                             atol=atol, rtol=rtol)
 
 
     @onlyCUDA

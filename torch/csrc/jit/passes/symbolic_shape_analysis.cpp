@@ -155,7 +155,7 @@ std::ostream& operator<<(std::ostream& os, const ShapeArguments& sa) {
   }
 
   os << "(";
-  for (size_t i = 0; i < sa.len(); i++) {
+  for(const auto i : c10::irange(sa.len())) {
     os << sa.at(i);
   }
   os << ")";
@@ -1057,7 +1057,7 @@ struct SymbolicShapeGraphAnalyzer {
           curr->output(i)->type()->expect<TensorType>()->symbolic_sizes();
       TORCH_INTERNAL_ASSERT(symbolic_sizes.rank());
 
-      for (size_t i = 0; i < *symbolic_sizes.rank(); i++) {
+      for(const auto i : c10::irange(*symbolic_sizes.rank())) {
         if (symbolic_sizes[i].is_static()) {
           continue;
         }
@@ -1165,7 +1165,7 @@ calculateSymbolicShapesOnOp(
     if (lower_bound_res.has_value() && upper_bound_res.has_value()) {
       TORCH_INTERNAL_ASSERT(lower_bound_res->size() == upper_bound_res->size());
       auto merged_res = std::vector<c10::SymbolicShape>();
-      for (size_t i = 0; i < lower_bound_res->size(); i++) {
+      for(const auto i : c10::irange(lower_bound_res->size())) {
         merged_res.push_back(
             combine_bounds(lower_bound_res->at(i), upper_bound_res->at(i)));
       }

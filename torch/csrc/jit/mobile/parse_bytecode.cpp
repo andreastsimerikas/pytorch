@@ -71,7 +71,7 @@ class OpCodeCache {
 void applyUpgrader(mobile::Function* function, uint64_t operator_version) {
   Code& code = function->get_code();
   auto& operator_version_map = getOperatorVersionMapForMobile();
-  for (size_t i = 0; i < code.instructions_.size(); i++) {
+  for(const auto i : c10::irange(code.instructions_.size())) {
     Instruction& inst = code.instructions_[i];
     if (inst.op == OpCode::OP) {
       std::string op_name = code.op_names_[inst.X].name;
@@ -180,7 +180,7 @@ void parseTypes(
     mobile::Function* function) {
   std::vector<std::string> types_string_list;
   types_string_list.resize(types_list.size());
-  for (size_t i = 0; i < types_list.size(); i++) {
+  for(const auto i : c10::irange(types_list.size())) {
     types_string_list[i] = types_list[i].toStringRef();
   }
 

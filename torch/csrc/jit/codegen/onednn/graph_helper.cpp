@@ -39,10 +39,10 @@ c10::optional<size_t> getDimensions(Value* v) {
 Operator makeWildcardOp(Node* node) {
   auto o = Operator(node, opkind::Wildcard);
   // wildcard op contains only topology info
-  for (size_t i = 0; i < node->inputs().size(); i++) {
+  for(const auto i : c10::irange(node->inputs().size())) {
     o.setInput(static_cast<size_t>(NULL), i);
   }
-  for (size_t i = 0; i < node->outputs().size(); i++) {
+  for(const auto i : c10::irange(node->outputs().size())) {
     o.setOutput(i);
   }
   return o;
@@ -433,7 +433,7 @@ LlgaGraphHelper::LlgaGraphHelper(
   }
 
   GRAPH_DEBUG("  Got #partitions: ", partitions_.size());
-  for (size_t partId = 0; partId < partitions_.size(); partId++) {
+  for(const auto partId : c10::irange(partitions_.size())) {
     for (auto opId : partitions_[partId].get_ops()) {
       opToOwningPartition_.add(opId, partId);
     }

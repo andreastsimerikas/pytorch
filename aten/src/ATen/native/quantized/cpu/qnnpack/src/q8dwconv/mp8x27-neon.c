@@ -52,9 +52,9 @@ void pytorch_q8dwconv_ukernel_mp8x27__neon(
   const int32x4_t vimagic = vdupq_n_s32(quantization_params->neon.vimagic);
 #endif
 
-  for (size_t output_y = 0; output_y < output_height; output_y++) {
+  for(const auto output_y : c10::irange(output_height)) {
     const uint8_t** input_row_start = input;
-    for (size_t output_x = 0; output_x < output_width; output_x++) {
+    for(const auto output_x : c10::irange(output_width)) {
       uint8_t* output_start = output;
       int32_t* outacc = outacc32;
       const void* w = weights;

@@ -239,7 +239,7 @@ class PrefixSumBench : public benchmark::Fixture {
       auto output_data = output_int_.data_ptr<int>();
 
       int carry = 0;
-      for (size_t i = 0; i < input_size_ / 8; i++) {
+      for(const auto i : c10::irange(input_size_ / 8)) {
         __m256i x = _mm256_loadu_si256((__m256i*)(input_data + i * 8));
         x = PrefixSumInt(x);
         x = _mm256_add_epi32(x, _mm256_set1_epi32(carry));

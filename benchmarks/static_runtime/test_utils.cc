@@ -173,7 +173,7 @@ void compareResults(
     auto lhs = expect.toTupleRef().elements();
     auto rhs = actual.toTupleRef().elements();
     EXPECT_TRUE(lhs.size() == rhs.size());
-    for (size_t i = 0; i < lhs.size(); i++) {
+    for(const auto i : c10::irange(lhs.size())) {
       compareResults(lhs[i], rhs[i]);
     }
   } else if (expect.isList()) {
@@ -181,7 +181,7 @@ void compareResults(
     auto lhs = expect.toList();
     auto rhs = actual.toList();
     EXPECT_TRUE(lhs.size() == rhs.size());
-    for (size_t i = 0; i < lhs.size(); i++) {
+    for(const auto i : c10::irange(lhs.size())) {
       compareResults(lhs[i], rhs[i]);
     }
   } else if (expect.isGenericDict()) {

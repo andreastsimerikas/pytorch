@@ -180,7 +180,7 @@ class AddOperatorTester {
     std::vector<uint8_t> b((batchSize() - 1) * bStride() + channels());
     std::vector<uint8_t> y((batchSize() - 1) * yStride() + channels());
     std::vector<float> yRef(batchSize() * channels());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(a.begin(), a.end(), std::ref(u8rng));
       std::generate(b.begin(), b.end(), std::ref(u8rng));
       std::fill(y.begin(), y.end(), 0xA5);
@@ -195,8 +195,8 @@ class AddOperatorTester {
       }
 
       /* Compute reference results */
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t c = 0; c < channels(); c++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto c : c10::irange(channels())) {
           yRef[i * channels() + c] = float(yZeroPoint()) +
               float(int32_t(a[i * aStride() + c]) - int32_t(aZeroPoint())) *
                   (aScale() / yScale()) +
@@ -250,8 +250,8 @@ class AddOperatorTester {
       add_op = nullptr;
 
       /* Verify results */
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t c = 0; c < channels(); c++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto c : c10::irange(channels())) {
           ASSERT_LE(uint32_t(y[i * yStride() + c]), uint32_t(qmax()));
           ASSERT_GE(uint32_t(y[i * yStride() + c]), uint32_t(qmin()));
           ASSERT_NEAR(

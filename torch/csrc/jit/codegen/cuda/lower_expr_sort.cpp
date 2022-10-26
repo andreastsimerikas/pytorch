@@ -339,13 +339,13 @@ class ExprSegmentationSorter {
 //      << group->payload()->ca_domains_.size() << ", "
 //      << group->payload()->pa_domains_.size() << ")";
 //   os << " ca_ids {";
-//   for (size_t i = 0; i < group->payload()->ca_domains_.size(); i++) {
+//   for(const auto i : c10::irange(group->payload()->ca_domains_.size())) {
 //     os << group->payload()->ca_domains_[i];
 //     if (i + 1 != group->payload()->ca_domains_.size())
 //       os << ", ";
 //   }
 //   os << "} pa_ids {";
-//   for (size_t i = 0; i < group->payload()->pa_domains_.size(); i++) {
+//   for(const auto i : c10::irange(group->payload()->pa_domains_.size())) {
 //     os << group->payload()->pa_domains_[i];
 //     if (i + 1 != group->payload()->pa_domains_.size())
 //       os << ", ";

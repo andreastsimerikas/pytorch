@@ -158,7 +158,7 @@ static inline void pytorch_pack_q8conv_wdq(
     }
     packed_w =
         (void*)((uintptr_t)packed_w + (nr - nr_block_size) * sizeof(int32_t));
-    for (size_t ki = 0; ki < ks; ki++) {
+    for(const auto ki : c10::irange(ks)) {
       for (size_t kr_block_start = 0; kr_block_start < kc;
            kr_block_start += kr) {
         const size_t kr_block_size = min(kc - kr_block_start, kr);
@@ -208,7 +208,7 @@ static inline void pytorch_pack_q8conv_wrq(
       *(packed.as_int32_ptr++) = b ? b[nr_block_start + nr_block_offset] : 0.0f;
     }
     packed.as_int32_ptr += (nr - nr_block_size);
-    for (size_t ki = 0; ki < ks; ki++) {
+    for(const auto ki : c10::irange(ks)) {
       for (size_t kr_block_start = 0; kr_block_start < kc;
            kr_block_start += kr) {
         const size_t kr_block_size = min(kc - kr_block_start, kr);
@@ -280,7 +280,7 @@ static inline void pytorch_pack_q8deconv_wdq(
     }
     packed_w =
         (void*)((uintptr_t)packed_w + (nr - nr_block_size) * sizeof(int32_t));
-    for (size_t ki = 0; ki < ks; ki++) {
+    for(const auto ki : c10::irange(ks)) {
       for (size_t kr_block_start = 0; kr_block_start < kc;
            kr_block_start += kr) {
         const size_t kr_block_size = min(kc - kr_block_start, kr);
@@ -330,7 +330,7 @@ static inline void pytorch_pack_q8deconv_wrq(
       *(packed.as_int32_ptr++) = b ? b[nr_block_start + nr_block_offset] : 0.0f;
     }
     packed.as_int32_ptr += (nr - nr_block_size);
-    for (size_t ki = 0; ki < ks; ki++) {
+    for(const auto ki : c10::irange(ks)) {
       for (size_t kr_block_start = 0; kr_block_start < kc;
            kr_block_start += kr) {
         const size_t kr_block_size = min(kc - kr_block_start, kr);
@@ -404,8 +404,8 @@ static inline void pytorch_pack_q8dw_wdq(
     }
     packed_w =
         (void*)((uintptr_t)packed_w + (cr - cr_block_size) * sizeof(int32_t));
-    for (size_t x = 0; x < w; x++) {
-      for (size_t y = 0; y < h; y++) {
+    for(const auto x : c10::irange(w)) {
+      for(const auto y : c10::irange(h)) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
           const uint8_t kv =
@@ -442,8 +442,8 @@ static inline void pytorch_pack_q8dw_wrq(
       *(packed.as_int32_ptr++) = b ? b[cr_block_start + cr_block_offset] : 0.0f;
     }
     packed.as_int32_ptr += (cr - cr_block_size);
-    for (size_t x = 0; x < w; x++) {
-      for (size_t y = 0; y < h; y++) {
+    for(const auto x : c10::irange(w)) {
+      for(const auto y : c10::irange(h)) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
           const uint8_t kv =
@@ -737,7 +737,7 @@ static inline void pytorch_pack_sconv_w(
       *packed_w++ = b ? b[nr_block_start + nr_block_offset] : 0.0f;
     }
     packed_w += nr - nr_block_size;
-    for (size_t ki = 0; ki < ks; ki++) {
+    for(const auto ki : c10::irange(ks)) {
       for (size_t kr_block_start = 0; kr_block_start < kc;
            kr_block_start += kr) {
         const size_t kr_block_size = min(kc - kr_block_start, kr);

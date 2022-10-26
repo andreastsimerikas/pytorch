@@ -233,7 +233,7 @@ std::vector<Shape> compute_shape_constant_pad_nd(
       "dimensions.");
 
   std::vector<int64_t> new_shape;
-  for (size_t i = 0; i < (size_t)l_diff; i++) {
+  for(const auto i : c10::irange((size_t)l_diff)) {
     new_shape.emplace_back(input_sizes[i]);
   }
 

@@ -125,7 +125,7 @@ c10::IValue SourceRangeSerializer::serialize_source(
     if (s == nullptr) {
       serialized = c10::ivalue::Tuple::create({lines, 0, 0});
     } else {
-      for (size_t lineno = 0; lineno < s->num_lines(); lineno++) {
+      for(const auto lineno : c10::irange(s->num_lines())) {
         std::string line_content = s->get_line(lineno).str();
         int64_t text_pos = store_text_and_get_index(line_content);
         lines.push_back(text_pos);

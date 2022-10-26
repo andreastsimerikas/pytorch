@@ -426,7 +426,7 @@ Tensor computeReshape(
                     B[i1,i2,i3,i4,i5] = A[idx/(3*2), (idx/3)%2, idx%3]
         */
         std::vector<ExprPtr> dims, indices;
-        for (size_t idx = 0; idx < outputShape.size(); idx++) {
+        for(const auto idx : c10::irange(outputShape.size())) {
           dims.push_back(outputShape[idx].node());
           indices.push_back(axes[idx].node());
         }
@@ -434,14 +434,14 @@ Tensor computeReshape(
         auto ndim = dims.size();
         std::vector<ExprPtr> strides(ndim);
         strides[ndim - 1] = immLike(dims[ndim - 1], 1);
-        for (size_t i = 1; i < ndim; i++) {
+        for(const auto i : c10::irange(1, ndim)) {
           strides[ndim - 1 - i] = alloc<Mul>(strides[ndim - i], dims[ndim - i]);
         }
 
         ExprHandle flat_idx = ExprHandle(flatten_index(dims, indices, strides));
         std::vector<ExprHandle> orig_buf_indexes(A.ndim(), ExprHandle(0));
         ExprHandle stride = ExprHandle(immLike(flat_idx, 1));
-        for (size_t idx = 0; idx < A.ndim(); idx++) {
+        for(const auto idx : c10::irange(A.ndim())) {
           size_t dim_idx = A.ndim() - idx - 1;
           // We don't need to generate mod-div for the first dimension -
           // ideally IRSimlifier would get rid of that for us, but for now

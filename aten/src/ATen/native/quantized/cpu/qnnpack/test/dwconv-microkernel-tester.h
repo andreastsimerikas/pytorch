@@ -192,7 +192,7 @@ class DWConvMicrokernelTester {
 
     const uint8_t* inputPtr = input.data() + 8;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(input.begin(), input.end(), std::ref(u8rng));
       std::generate(kernel.begin(), kernel.end(), std::ref(u8rng));
       std::generate(bias.begin(), bias.end(), std::ref(s32rng));
@@ -237,11 +237,11 @@ class DWConvMicrokernelTester {
       }
       std::shuffle(indirectInput.begin(), indirectInput.end(), rng);
 
-      for (size_t x = 0; x < width(); x++) {
-        for (size_t c = 0; c < channels(); c++) {
+      for(const auto x : c10::irange(width())) {
+        for(const auto c : c10::irange(channels())) {
           int32_t acc = bias[c];
-          for (size_t kx = 0; kx < kernelWidth(); kx++) {
-            for (size_t ky = 0; ky < kernelHeight(); ky++) {
+          for(const auto kx : c10::irange(kernelWidth())) {
+            for(const auto ky : c10::irange(kernelHeight())) {
               acc += (int32_t(indirectInput
                                   [(x * subsampling() + kx) * kernelHeight() +
                                    ky][c]) -
@@ -307,8 +307,8 @@ class DWConvMicrokernelTester {
           (outputStride() - channels()) * sizeof(uint8_t),
           &quantizationParams);
 
-      for (size_t x = 0; x < width(); x++) {
-        for (size_t c = 0; c < channels(); c++) {
+      for(const auto x : c10::irange(width())) {
+        for(const auto c : c10::irange(channels())) {
 #if defined(__arm__) || defined(_M_ARM)
           const uint8_t referenceOutput = pytorch_qnnp_fp32_requantize_magic(
               accumulators[x * channels() + c], scalarRequantizationParams, c);
@@ -361,7 +361,7 @@ class DWConvMicrokernelTester {
 
     const uint8_t* inputPtr = input.data() + 8;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(input.begin(), input.end(), std::ref(u8rng));
       std::generate(kernel.begin(), kernel.end(), std::ref(u8rng));
       std::generate(bias.begin(), bias.end(), std::ref(s32rng));
@@ -436,11 +436,11 @@ class DWConvMicrokernelTester {
       }
       std::shuffle(indirectInput.begin(), indirectInput.end(), rng);
 
-      for (size_t x = 0; x < width(); x++) {
-        for (size_t c = 0; c < channels(); c++) {
+      for(const auto x : c10::irange(width())) {
+        for(const auto c : c10::irange(channels())) {
           int32_t acc = bias[c];
-          for (size_t kx = 0; kx < kernelWidth(); kx++) {
-            for (size_t ky = 0; ky < kernelHeight(); ky++) {
+          for(const auto kx : c10::irange(kernelWidth())) {
+            for(const auto ky : c10::irange(kernelHeight())) {
               acc += (int32_t(indirectInput
                                   [(x * subsampling() + kx) * kernelHeight() +
                                    ky][c]) -
@@ -507,8 +507,8 @@ class DWConvMicrokernelTester {
           (outputStride() - channels()) * sizeof(uint8_t),
           &quantizationParams);
 
-      for (size_t x = 0; x < width(); x++) {
-        for (size_t c = 0; c < channels(); c++) {
+      for(const auto x : c10::irange(width())) {
+        for(const auto c : c10::irange(channels())) {
 #if defined(__arm__) || defined(_M_ARM)
           const uint8_t referenceOutput = pytorch_qnnp_fp32_requantize_magic(
               accumulators[x * channels() + c], scalarRequantizationParams, c);

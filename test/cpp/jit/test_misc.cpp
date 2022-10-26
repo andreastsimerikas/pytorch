@@ -1548,7 +1548,7 @@ TEST(FallbackGraphsTest, Basic) {
   {
     EnableProfilingGuard epg;
     GraphFunction f("fallbackGraphs", graph, nullptr);
-    for (size_t i = 0; i < getNumProfiledRuns() + 1; i++) {
+    for(const auto i : c10::irange(getNumProfiledRuns() + 1)) {
       stack.emplace_back(x.clone());
       stack.emplace_back(y.clone());
       if (i == getNumProfiledRuns()) {

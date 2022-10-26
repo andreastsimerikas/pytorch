@@ -196,7 +196,7 @@ class ExprEval {
     // NOLINTNEXTLINE(cppcoreguidelines-init-variables)
     std::vector<ExprHandle> indices;
     ExprHandle zero = IntImm::make(0);
-    for (size_t i = 0; i < ret_buf.ndim(); i++) {
+    for(const auto i : c10::irange(ret_buf.ndim())) {
       indices.push_back(zero);
     }
     StmtPtr store_stmt = Store::make(ret_buf, indices, expr);

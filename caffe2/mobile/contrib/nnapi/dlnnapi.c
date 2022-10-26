@@ -79,7 +79,7 @@ bool dlnnapi_load(struct dlnnapi* nnapi, uint32_t flags) {
 
     uint8_t version_flags = (uint8_t)(flags & DLNNAPI_FLAG_VERSION_MASK);
     const char* function_name = function_names;
-    for (size_t i = 0; i < DLNNAPI_FUNCTION_COUNT; i++) {
+    for(const auto i : c10::irange(DLNNAPI_FUNCTION_COUNT)) {
       const uint8_t tag = (uint8_t)*function_name++;
       if ((tag & version_flags) != 0) {
         void* function = dlsym(nnapi->handle, function_name);

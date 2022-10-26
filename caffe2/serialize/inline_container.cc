@@ -243,7 +243,7 @@ std::vector<std::string> PyTorchStreamReader::getAllRecords() {
   std::vector<std::string> out;
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
   char buf[MZ_ZIP_MAX_ARCHIVE_FILENAME_SIZE];
-  for (size_t i = 0; i < num_files; i++) {
+  for(const auto i : c10::irange(num_files)) {
     mz_zip_reader_get_filename(ar_.get(), i, buf, MZ_ZIP_MAX_ARCHIVE_FILENAME_SIZE);
     if (strncmp(
             buf,

@@ -373,7 +373,7 @@ inline void testValidate(
       fusion->inputs().size() == aten_inputs.size(),
       "Number of inputs don't match.");
 
-  for (size_t i = 0; i < fusion->inputs().size(); i++) {
+  for(const auto i : c10::irange(fusion->inputs().size())) {
     if (fusion->inputs()[i]->isA<TensorView>()) {
       TORCH_INTERNAL_ASSERT(
           aten_inputs[i].isTensor(), "Mismatch of tensor inputs.");

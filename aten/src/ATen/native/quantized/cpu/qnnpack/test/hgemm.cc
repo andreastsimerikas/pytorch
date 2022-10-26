@@ -63,7 +63,7 @@ TEST(HGEMM_8x8__AARCH32_NEONFP16ARITH, k_eq_4_qmax128) {
 
 TEST(HGEMM_8x8__AARCH32_NEONFP16ARITH, k_gt_4) {
   TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-  for (size_t k = 5; k < 8; k++) {
+  for(const auto k : c10::irange(5, 8)) {
     GemmMicrokernelTester().mr(8).nr(8).np(8).kr(1).m(8).n(8).k(k).test(
         pytorch_hgemm_ukernel_8x8__aarch32_neonfp16arith);
   }
@@ -71,7 +71,7 @@ TEST(HGEMM_8x8__AARCH32_NEONFP16ARITH, k_gt_4) {
 
 TEST(HGEMM_8x8__AARCH32_NEONFP16ARITH, k_gt_4_strided_a) {
   TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-  for (size_t k = 5; k < 8; k++) {
+  for(const auto k : c10::irange(5, 8)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -87,7 +87,7 @@ TEST(HGEMM_8x8__AARCH32_NEONFP16ARITH, k_gt_4_strided_a) {
 
 TEST(HGEMM_8x8__AARCH32_NEONFP16ARITH, k_gt_4_strided_c) {
   TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-  for (size_t k = 5; k < 8; k++) {
+  for(const auto k : c10::irange(5, 8)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -103,7 +103,7 @@ TEST(HGEMM_8x8__AARCH32_NEONFP16ARITH, k_gt_4_strided_c) {
 
 TEST(HGEMM_8x8__AARCH32_NEONFP16ARITH, k_gt_4_subtile) {
   TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-  for (size_t k = 5; k < 8; k++) {
+  for(const auto k : c10::irange(5, 8)) {
     for (uint32_t m = 1; m <= 8; m++) {
       for (uint32_t n = 1; n <= 8; n++) {
         GemmMicrokernelTester()

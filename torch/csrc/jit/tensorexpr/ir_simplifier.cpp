@@ -2294,7 +2294,7 @@ ExprPtr TermExpander::mutate(MaxTermPtr v) {
   } else {
     max = variables[0];
   }
-  for (size_t i = 1; i < variables.size(); i++) {
+  for(const auto i : c10::irange(1, variables.size())) {
     max = alloc<Max>(max, variables[i], v->propagate_nans());
   }
   return max->accept_mutator(this);
@@ -2317,7 +2317,7 @@ ExprPtr TermExpander::mutate(MinTermPtr v) {
   } else {
     min = variables[0];
   }
-  for (size_t i = 1; i < variables.size(); i++) {
+  for(const auto i : c10::irange(1, variables.size())) {
     min = alloc<Min>(min, variables[i], v->propagate_nans());
   }
   return min->accept_mutator(this);

@@ -149,7 +149,7 @@ class FullyConnectedOperatorTester {
     size_t num_zero_points_padded = outputChannels() + 8;
     std::vector<uint8_t> kernelZeroPoints(num_zero_points_padded, 127);
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(input.begin(), input.end(), std::ref(u8rng));
       std::generate(kernel.begin(), kernel.end(), std::ref(u8rng));
       std::generate(bias.begin(), bias.end(), std::ref(s32rng));
@@ -160,14 +160,14 @@ class FullyConnectedOperatorTester {
       std::fill(output_dynamic.begin(), output_dynamic.end(), 0.0f);
       std::fill(accumulators.begin(), accumulators.end(), 0);
 
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t oc = 0; oc < outputChannels(); oc++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto oc : c10::irange(outputChannels())) {
           accumulators[i * outputChannels() + oc] = bias[oc];
         }
       }
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t oc = 0; oc < outputChannels(); oc++) {
-          for (size_t ic = 0; ic < inputChannels(); ic++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto oc : c10::irange(outputChannels())) {
+          for(const auto ic : c10::irange(inputChannels())) {
             accumulators[i * outputChannels() + oc] +=
                 (int32_t(inputPtr[i * inputStride() + ic]) -
                  int32_t(inputZeroPoint)) *
@@ -327,8 +327,8 @@ class FullyConnectedOperatorTester {
         case Mode::Static:
         case Mode::Runtime:
         {
-          for (size_t i = 0; i < batchSize(); i++) {
-            for (size_t c = 0; c < outputChannels(); c++) {
+          for(const auto i : c10::irange(batchSize())) {
+            for(const auto c : c10::irange(outputChannels())) {
               const double scaledAccumulator =
                   accumulators[i * outputChannels() + c] *
                   requantization_scales[c];
@@ -349,13 +349,13 @@ class FullyConnectedOperatorTester {
         case Mode::Dynamic:
         {
           // Bias is added post scaling, as float.
-          for (size_t i = 0; i < batchSize(); i++) {
-            for (size_t oc = 0; oc < outputChannels(); oc++) {
+          for(const auto i : c10::irange(batchSize())) {
+            for(const auto oc : c10::irange(outputChannels())) {
               accumulators[i * outputChannels() + oc] -= bias[oc];
             }
           }
-          for (size_t i = 0; i < batchSize(); i++) {
-            for (size_t c = 0; c < outputChannels(); c++) {
+          for(const auto i : c10::irange(batchSize())) {
+            for(const auto c : c10::irange(outputChannels())) {
               ASSERT_FLOAT_EQ(
                   output_dynamic[i * outputChannels() + c],
                   ((float)accumulators[i * outputChannels() + c] *

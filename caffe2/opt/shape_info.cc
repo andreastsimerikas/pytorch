@@ -23,7 +23,7 @@ bool isNumber(const std::string& s) {
 std::string toLower(const std::string& s) {
   std::string t;
   t.resize(s.size());
-  for (size_t i = 0; i < t.size(); i++) {
+  for(const auto i : c10::irange(t.size())) {
     t[i] = std::tolower(s[i]);
   }
   return t;
@@ -216,7 +216,7 @@ void parseShapeInfoMapFromString(
     }
 
     bool valid = true;
-    for (size_t i = 1; i < size; i++) {
+    for(const auto i : c10::irange(1, size)) {
       auto dim = kv[i];
       try {
         shape.add_dims(std::stoi(dim));

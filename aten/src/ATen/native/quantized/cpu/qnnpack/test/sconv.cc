@@ -52,7 +52,7 @@ TEST(SCONV_6x8__PSIMD, k_eq_1_qmax128) {
 }
 
 TEST(SCONV_6x8__PSIMD, k_gt_1) {
-  for (size_t k = 2; k < 16; k++) {
+  for(const auto k : c10::irange(2, 16)) {
     GemmMicrokernelTester()
         .mr(6)
         .nr(8)
@@ -67,7 +67,7 @@ TEST(SCONV_6x8__PSIMD, k_gt_1) {
 }
 
 TEST(SCONV_6x8__PSIMD, k_gt_1_strided_c) {
-  for (size_t k = 2; k < 16; k++) {
+  for(const auto k : c10::irange(2, 16)) {
     GemmMicrokernelTester()
         .mr(6)
         .nr(8)
@@ -83,7 +83,7 @@ TEST(SCONV_6x8__PSIMD, k_gt_1_strided_c) {
 }
 
 TEST(SCONV_6x8__PSIMD, k_gt_1_subtile) {
-  for (size_t k = 2; k < 16; k++) {
+  for(const auto k : c10::irange(2, 16)) {
     for (uint32_t m = 1; m <= 6; m++) {
       for (uint32_t n = 1; n <= 8; n++) {
         GemmMicrokernelTester()

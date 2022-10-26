@@ -100,7 +100,7 @@ class ChannelShuffleOperatorTester {
     std::vector<uint8_t> input((batchSize() - 1) * inputStride() + channels());
     std::vector<uint8_t> output(
         (batchSize() - 1) * outputStride() + channels());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(input.begin(), input.end(), std::ref(u8rng));
       std::fill(output.begin(), output.end(), 0xA5);
 
@@ -135,9 +135,9 @@ class ChannelShuffleOperatorTester {
       channel_shuffle_op = nullptr;
 
       /* Verify results */
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t g = 0; g < groups(); g++) {
-          for (size_t c = 0; c < groupChannels(); c++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto g : c10::irange(groups())) {
+          for(const auto c : c10::irange(groupChannels())) {
             ASSERT_EQ(
                 uint32_t(input[i * inputStride() + g * groupChannels() + c]),
                 uint32_t(output[i * outputStride() + c * groups() + g]));

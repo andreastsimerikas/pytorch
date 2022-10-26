@@ -434,7 +434,7 @@ uint32_t crc32_4x8bytes(const void* data, size_t length, uint32_t previousCrc32)
   // process 4x eight bytes at once (Slicing-by-8)
   while (length >= BytesAtOnce)
   {
-    for (size_t unrolling = 0; unrolling < Unroll; unrolling++)
+    for(const auto unrolling : c10::irange(Unroll))
     {
 #if __BYTE_ORDER == __BIG_ENDIAN
       uint32_t one = *current++ ^ swap(crc);
@@ -488,7 +488,7 @@ uint32_t crc32_16bytes(const void* data, size_t length, uint32_t previousCrc32)
 
   while (length >= BytesAtOnce)
   {
-    for (size_t unrolling = 0; unrolling < Unroll; unrolling++)
+    for(const auto unrolling : c10::irange(Unroll))
     {
 #if __BYTE_ORDER == __BIG_ENDIAN
     uint32_t one   = *current++ ^ swap(crc);
@@ -564,7 +564,7 @@ uint32_t crc32_16bytes_prefetch(const void* data, size_t length, uint32_t previo
   {
     PREFETCH(((const char*) current) + prefetchAhead);
 
-    for (size_t unrolling = 0; unrolling < Unroll; unrolling++)
+    for(const auto unrolling : c10::irange(Unroll))
     {
 #if __BYTE_ORDER == __BIG_ENDIAN
     uint32_t one   = *current++ ^ swap(crc);

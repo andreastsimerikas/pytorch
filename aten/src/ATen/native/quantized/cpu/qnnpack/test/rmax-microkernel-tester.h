@@ -45,12 +45,12 @@ class RMaxMicrokernelTester {
     auto u8rng = std::bind(std::uniform_int_distribution<uint8_t>(), rng);
 
     std::vector<uint8_t> x(n());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(x.begin(), x.end(), std::ref(u8rng));
 
       /* Compute reference results */
       uint8_t yRef = 0;
-      for (size_t i = 0; i < n(); i++) {
+      for(const auto i : c10::irange(n())) {
         yRef = std::max(yRef, x[i]);
       }
 

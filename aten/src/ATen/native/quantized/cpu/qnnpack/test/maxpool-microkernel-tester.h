@@ -189,11 +189,11 @@ class MaxPoolMicrokernelTester {
     std::vector<uint8_t> zero(kc());
     std::vector<uint8_t> y((n() - 1) * yStride() + kc());
     std::vector<uint8_t> yRef(n() * kc());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(x.begin(), x.end(), std::ref(u8rng));
       std::fill(y.begin(), y.end(), 0xA5);
 
-      for (size_t i = 0; i < indirectX.size(); i++) {
+      for(const auto i : c10::irange(indirectX.size())) {
         indirectX[i] = x.data() + i * xStride();
       }
       std::shuffle(indirectX.begin(), indirectX.end(), rng);
@@ -203,10 +203,10 @@ class MaxPoolMicrokernelTester {
           pytorch_qnnp_compute_u8_clamping_params(qmin(), qmax());
 
       /* Compute reference results */
-      for (size_t i = 0; i < n(); i++) {
-        for (size_t k = 0; k < kc(); k++) {
+      for(const auto i : c10::irange(n())) {
+        for(const auto k : c10::irange(kc())) {
           uint8_t maxValue = 0;
-          for (size_t j = 0; j < ks(); j++) {
+          for(const auto j : c10::irange(ks())) {
             maxValue = std::max(maxValue, indirectX[i * s() * kh() + j][k]);
           }
           maxValue = std::min(maxValue, qmax());
@@ -227,8 +227,8 @@ class MaxPoolMicrokernelTester {
           &clampingParams);
 
       /* Verify results */
-      for (size_t i = 0; i < n(); i++) {
-        for (size_t k = 0; k < kc(); k++) {
+      for(const auto i : c10::irange(n())) {
+        for(const auto k : c10::irange(kc())) {
           ASSERT_EQ(
               uint32_t(yRef[i * kc() + k]), uint32_t(y[i * yStride() + k]))
               << "at pixel " << i << ", channel " << k << ", n = " << n()

@@ -89,7 +89,7 @@ void createPropNodeForIfBlock(
         int64_t frame_id = 0;
         pop(stack, frame_id);
 
-        for (size_t i = 0; i < b->outputs().size(); i++) {
+        for(const auto i : c10::irange(b->outputs().size())) {
           // propagate a then-block or else-output to an if-output
           auto nbo = td.old_to_new_.at(b->outputs()[i]);
           td.old_to_new_[n->outputs()[i]] = nbo;
@@ -155,7 +155,7 @@ static void traceLoop(Node* n, ProfilingRecord* pr, TracingData& td) {
       LoopView lv(n);
       TORCH_INTERNAL_ASSERT(
           lv.bodyCarriedInputs().size() == lv.carriedInputs().size());
-      for (size_t i = 0; i < lv.bodyCarriedInputs().size(); i++) {
+      for(const auto i : c10::irange(lv.bodyCarriedInputs().size())) {
         auto bno = td.old_to_new_.at(lv.carriedInputs()[i]);
         td.old_to_new_[lv.bodyCarriedInputs()[i]] = bno;
         GRAPH_DEBUG(
@@ -195,7 +195,7 @@ static void traceLoop(Node* n, ProfilingRecord* pr, TracingData& td) {
 
       TORCH_INTERNAL_ASSERT(
           lv.bodyCarriedOutputs().size() == lv.carriedOutputs().size());
-      for (size_t i = 0; i < lv.bodyCarriedOutputs().size(); i++) {
+      for(const auto i : c10::irange(lv.bodyCarriedOutputs().size())) {
         auto bno = td.old_to_new_.at(lv.bodyCarriedOutputs()[i]);
         td.old_to_new_[lv.carriedOutputs()[i]] = bno;
         GRAPH_DEBUG(
@@ -252,7 +252,7 @@ void insertTracingNodes(Block* block, ProfilingRecord* pr, TracingData& td) {
       auto tracer = traceNode(n, td, stack);
       auto ouputs_size = n->outputs().size();
       auto iivs = pop(stack, ouputs_size);
-      for (size_t j = 0; j < ouputs_size; j++) {
+      for(const auto j : c10::irange(ouputs_size)) {
         auto& iiv = iivs[j];
         if (iiv.isTensor()) {
           auto t = iiv.toTensor();

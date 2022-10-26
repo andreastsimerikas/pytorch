@@ -96,7 +96,7 @@ void multi_tensor_apply(
 
         int loc_block_info = 0;
         int loc_tensor_info = 0;
-        for(size_t t = 0; t < n_tensors; t++) {
+        for(const auto t : c10::irange(n_tensors)) {
 
             tensorListMeta.scalar_vals[loc_tensor_info] = scalars[t].to<scalar_T>();
 
@@ -155,7 +155,7 @@ void multi_tensor_apply(
 
         int loc_block_info = 0;
         int loc_tensor_info = 0;
-        for(size_t t = 0; t < n_tensors; t++) {
+        for(const auto t : c10::irange(n_tensors)) {
             tensorListMeta.numel_for_tensor[loc_tensor_info] = tensor_lists[0][t].numel();
             for (int d = 0; d < depth; d++) {
                 tensorListMeta.addresses[d][loc_tensor_info] = tensor_lists[d][t].data_ptr();

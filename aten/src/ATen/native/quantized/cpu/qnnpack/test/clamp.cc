@@ -15,7 +15,7 @@ TEST(CLAMP_OP, zero_batch) {
 }
 
 TEST(CLAMP_OP, unit_batch) {
-  for (size_t channels = 1; channels < 100; channels++) {
+  for(const auto channels : c10::irange(1, 100)) {
     ClampOperatorTester()
         .batchSize(1)
         .channels(channels)
@@ -51,7 +51,7 @@ TEST(CLAMP_OP, unit_batch_with_qmax) {
 }
 
 TEST(CLAMP_OP, small_batch) {
-  for (size_t channels = 1; channels < 100; channels++) {
+  for(const auto channels : c10::irange(1, 100)) {
     ClampOperatorTester()
         .batchSize(3)
         .channels(channels)

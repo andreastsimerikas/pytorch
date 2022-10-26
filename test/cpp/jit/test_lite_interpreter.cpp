@@ -1956,7 +1956,7 @@ TEST(LiteInterpreterUpgraderTest, DivScalarScalarV2) {
   auto expect_output = std::vector<IValue>(
       {IValue(2.0), IValue(10.0), IValue(5.0), IValue(2.0)});
   // auto actual_output = output.toTensor();
-  for (size_t i = 0; i < expect_output.size(); i++) {
+  for(const auto i : c10::irange(expect_output.size())) {
     ASSERT_EQ(output_list[i], expect_output[i]);
   }
 }

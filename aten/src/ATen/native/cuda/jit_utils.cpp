@@ -1000,7 +1000,7 @@ std::string generate_code(
   // (look at polygamma for example).
   std::string extra_params = "";
   std::string extra_args = "";
-  for (size_t i = 0; i < extra_args_typenames.size(); i++) {
+  for(const auto i : c10::irange(extra_args_typenames.size())) {
     auto type = std::string(extra_args_typenames[i]);
     auto name = "extra_arg_" + std::string(to_string(i));
     extra_params += "," + type + " " + name;

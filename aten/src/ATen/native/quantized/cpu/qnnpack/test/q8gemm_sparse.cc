@@ -547,7 +547,7 @@ TEST(Q8GEMM__##MR ## x ##NR ## c##row_block_size ## x ##col_block_size ## __AARC
  \
 TEST(Q8GEMM__##MR ## x ##NR ## c##row_block_size ## x ##col_block_size ## __AARCH32_NEON, packedA_k_gt_8) { \
   TEST_REQUIRES_ARM_NEON; \
-  for (size_t k = 9; k < 16; k++) { \
+  for(const auto k : c10::irange(9, 16)) { \
     GemmBlockSparseMicrokernelTester tester = GemmBlockSparseMicrokernelTester() \
         .mr(MR) \
         .nr(NR) \
@@ -570,7 +570,7 @@ TEST(Q8GEMM__##MR ## x ##NR ## c##row_block_size ## x ##col_block_size ## __AARC
  \
 TEST(Q8GEMM__##MR ## x ##NR ## c##row_block_size ## x ##col_block_size ## __AARCH32_NEON, packedA_k_gt_8_strided_a) { \
   TEST_REQUIRES_ARM_NEON; \
-  for (size_t k = 9; k < 16; k++) { \
+  for(const auto k : c10::irange(9, 16)) { \
     GemmBlockSparseMicrokernelTester tester = GemmBlockSparseMicrokernelTester() \
         .mr(MR) \
         .nr(NR) \
@@ -594,7 +594,7 @@ TEST(Q8GEMM__##MR ## x ##NR ## c##row_block_size ## x ##col_block_size ## __AARC
  \
 TEST(Q8GEMM__##MR ## x ##NR ## c##row_block_size ## x ##col_block_size ## __AARCH32_NEON, packedA_k_gt_8_strided_c) { \
   TEST_REQUIRES_ARM_NEON; \
-  for (size_t k = 9; k < 16; k++) { \
+  for(const auto k : c10::irange(9, 16)) { \
     GemmBlockSparseMicrokernelTester tester = GemmBlockSparseMicrokernelTester() \
         .mr(MR) \
         .nr(NR) \
@@ -618,7 +618,7 @@ TEST(Q8GEMM__##MR ## x ##NR ## c##row_block_size ## x ##col_block_size ## __AARC
  \
 TEST(Q8GEMM__##MR ## x ##NR ## c##row_block_size ## x ##col_block_size ## __AARCH32_NEON, packedA_k_gt_8_azp0) { \
   TEST_REQUIRES_ARM_NEON; \
-  for (size_t k = 9; k < 16; k++) { \
+  for(const auto k : c10::irange(9, 16)) { \
     GemmBlockSparseMicrokernelTester tester = GemmBlockSparseMicrokernelTester() \
         .mr(MR) \
         .nr(NR) \
@@ -642,7 +642,7 @@ TEST(Q8GEMM__##MR ## x ##NR ## c##row_block_size ## x ##col_block_size ## __AARC
  \
 TEST(Q8GEMM__##MR ## x ##NR ## c##row_block_size ## x ##col_block_size ## __AARCH32_NEON, packedA_k_gt_8_bzp0) { \
   TEST_REQUIRES_ARM_NEON; \
-  for (size_t k = 9; k < 16; k++) { \
+  for(const auto k : c10::irange(9, 16)) { \
     GemmBlockSparseMicrokernelTester tester = GemmBlockSparseMicrokernelTester() \
         .mr(MR) \
         .nr(NR) \
@@ -666,7 +666,7 @@ TEST(Q8GEMM__##MR ## x ##NR ## c##row_block_size ## x ##col_block_size ## __AARC
  \
 TEST(Q8GEMM__##MR ## x ##NR ## c##row_block_size ## x ##col_block_size ## __AARCH32_NEON, packedA_k_gt_8_nozp) { \
   TEST_REQUIRES_ARM_NEON; \
-  for (size_t k = 9; k < 16; k++) { \
+  for(const auto k : c10::irange(9, 16)) { \
     GemmBlockSparseMicrokernelTester tester = GemmBlockSparseMicrokernelTester() \
         .mr(MR) \
         .nr(NR) \
@@ -691,7 +691,7 @@ TEST(Q8GEMM__##MR ## x ##NR ## c##row_block_size ## x ##col_block_size ## __AARC
  \
 TEST(Q8GEMM__##MR ## x ##NR ## c##row_block_size ## x ##col_block_size ## __AARCH32_NEON, packedA_k_gt_8_subtile) { \
   TEST_REQUIRES_ARM_NEON; \
-  for (size_t k = 9; k < 16; k++) { \
+  for(const auto k : c10::irange(9, 16)) { \
     for (uint32_t m = 1; m <= MR; m++) { \
       for (uint32_t n = 1; n <= NR; n++) { \
         GemmBlockSparseMicrokernelTester tester = GemmBlockSparseMicrokernelTester() \
@@ -1344,7 +1344,7 @@ TEST(Q8GEMM_8x4c1x4__SSE2, packedA_k_eq_8_nozp) {
 
 TEST(Q8GEMM_8x4c1x4__SSE2, packedA_k_gt_8) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmBlockSparseMicrokernelTester tester = GemmBlockSparseMicrokernelTester()
         .mr(8)
         .nr(4)
@@ -1365,7 +1365,7 @@ TEST(Q8GEMM_8x4c1x4__SSE2, packedA_k_gt_8) {
 
 TEST(Q8GEMM_8x4c1x4__SSE2, packedA_k_gt_8_strided_a) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmBlockSparseMicrokernelTester tester = GemmBlockSparseMicrokernelTester()
         .mr(8)
         .nr(4)
@@ -1387,7 +1387,7 @@ TEST(Q8GEMM_8x4c1x4__SSE2, packedA_k_gt_8_strided_a) {
 
 TEST(Q8GEMM_8x4c1x4__SSE2, packedA_k_gt_8_strided_c) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmBlockSparseMicrokernelTester tester = GemmBlockSparseMicrokernelTester()
         .mr(8)
         .nr(4)
@@ -1409,7 +1409,7 @@ TEST(Q8GEMM_8x4c1x4__SSE2, packedA_k_gt_8_strided_c) {
 
 TEST(Q8GEMM_8x4c1x4__SSE2, packedA_k_gt_8_azp0) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmBlockSparseMicrokernelTester tester = GemmBlockSparseMicrokernelTester()
         .mr(8)
         .nr(4)
@@ -1431,7 +1431,7 @@ TEST(Q8GEMM_8x4c1x4__SSE2, packedA_k_gt_8_azp0) {
 
 TEST(Q8GEMM_8x4c1x4__SSE2, packedA_k_gt_8_bzp0) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmBlockSparseMicrokernelTester tester = GemmBlockSparseMicrokernelTester()
         .mr(8)
         .nr(4)
@@ -1453,7 +1453,7 @@ TEST(Q8GEMM_8x4c1x4__SSE2, packedA_k_gt_8_bzp0) {
 
 TEST(Q8GEMM_8x4c1x4__SSE2, packedA_k_gt_8_nozp) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmBlockSparseMicrokernelTester tester = GemmBlockSparseMicrokernelTester()
         .mr(8)
         .nr(4)
@@ -1476,7 +1476,7 @@ TEST(Q8GEMM_8x4c1x4__SSE2, packedA_k_gt_8_nozp) {
 
 TEST(Q8GEMM_8x4c1x4__SSE2, packedA_k_gt_8_subtile) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     for (uint32_t m = 1; m <= 8; m++) {
       for (uint32_t n = 1; n <= 4; n++) {
         GemmBlockSparseMicrokernelTester tester = GemmBlockSparseMicrokernelTester()

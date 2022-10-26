@@ -138,13 +138,13 @@ class TestE2EBase : public ::testing::Test {
     auto matchedOp = torch::jit::findOperatorFor(full_name);
     ASSERT_TRUE(matchedOp);
 
-    for (size_t i = 0; i < numIters; i++) {
+    for(const auto i : c10::irange(numIters)) {
       // Create the autograd context guard.
       AutogradContextGuard guard;
 
       // Multiple RPCs within one autograd context for the forward pass.
       auto result = remoteAdd(t1, t2, matchedOp);
-      for (size_t j = 0; j < 5; j++) {
+      for(const auto j : c10::irange(5)) {
         result = remoteAdd(t1, result, matchedOp);
       }
 

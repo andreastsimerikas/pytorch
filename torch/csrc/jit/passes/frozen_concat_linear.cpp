@@ -158,7 +158,7 @@ class ConcatLinearLayers {
   void collectAndMergeLinearLayers(std::vector<Node*>& linear_layer_group) {
     std::unordered_set<Node*> checked_nodes;
 
-    for (size_t i = 0; i < linear_layer_group.size(); i++) {
+    for(const auto i : c10::irange(linear_layer_group.size())) {
       Node* base_node = linear_layer_group[i];
       if (checked_nodes.count(base_node) != 0) {
         continue;

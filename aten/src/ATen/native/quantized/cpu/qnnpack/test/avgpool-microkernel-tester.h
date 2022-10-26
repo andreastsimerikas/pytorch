@@ -233,11 +233,11 @@ class AvgPoolMicrokernelTester {
     std::vector<uint8_t> yRef(n() * kc());
     std::vector<float> yFP(n() * kc());
     std::vector<int32_t> yAcc(n() * kc());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(x.begin(), x.end(), std::ref(u8rng));
       std::fill(y.begin(), y.end(), 0xA5);
 
-      for (size_t i = 0; i < indirectX.size(); i++) {
+      for(const auto i : c10::irange(indirectX.size())) {
         indirectX[i] = x.data() + i * xStride();
       }
       std::shuffle(indirectX.begin(), indirectX.end(), rng);
@@ -260,10 +260,10 @@ class AvgPoolMicrokernelTester {
                   yMax());
 
       /* Compute reference results */
-      for (size_t i = 0; i < n(); i++) {
-        for (size_t k = 0; k < kc(); k++) {
+      for(const auto i : c10::irange(n())) {
+        for(const auto k : c10::irange(kc())) {
           int32_t acc = scalarQuantizationParams.scalar.bias;
-          for (size_t j = 0; j < ks(); j++) {
+          for(const auto j : c10::irange(ks())) {
             acc += indirectX[i * s() * kh() + j][k];
           }
           yAcc[i * kc() + k] = acc;
@@ -290,8 +290,8 @@ class AvgPoolMicrokernelTester {
           &quantizationParams);
 
       /* Verify results */
-      for (size_t i = 0; i < n(); i++) {
-        for (size_t k = 0; k < kc(); k++) {
+      for(const auto i : c10::irange(n())) {
+        for(const auto k : c10::irange(kc())) {
           ASSERT_LE(uint32_t(y[i * yStride() + k]), uint32_t(yMax()))
               << "at pixel " << i << ", channel " << k << ", n = " << n()
               << ", kc = " << kc();
@@ -327,11 +327,11 @@ class AvgPoolMicrokernelTester {
     std::vector<uint8_t> yRef(n() * kc());
     std::vector<float> yFP(n() * kc());
     std::vector<int32_t> yAcc(n() * kc());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(x.begin(), x.end(), std::ref(u8rng));
       std::fill(y.begin(), y.end(), 0xA5);
 
-      for (size_t i = 0; i < indirectX.size(); i++) {
+      for(const auto i : c10::irange(indirectX.size())) {
         indirectX[i] = x.data() + i * xStride();
       }
       std::shuffle(indirectX.begin(), indirectX.end(), rng);
@@ -354,10 +354,10 @@ class AvgPoolMicrokernelTester {
                   yMax());
 
       /* Compute reference results */
-      for (size_t i = 0; i < n(); i++) {
-        for (size_t k = 0; k < kc(); k++) {
+      for(const auto i : c10::irange(n())) {
+        for(const auto k : c10::irange(kc())) {
           int32_t acc = scalarQuantizationParams.scalar.bias;
-          for (size_t j = 0; j < ks(); j++) {
+          for(const auto j : c10::irange(ks())) {
             acc += indirectX[i * s() * kh() + j][k];
           }
           yAcc[i * kc() + k] = acc;
@@ -385,8 +385,8 @@ class AvgPoolMicrokernelTester {
           &quantizationParams);
 
       /* Verify results */
-      for (size_t i = 0; i < n(); i++) {
-        for (size_t k = 0; k < kc(); k++) {
+      for(const auto i : c10::irange(n())) {
+        for(const auto k : c10::irange(kc())) {
           ASSERT_LE(uint32_t(y[i * yStride() + k]), uint32_t(yMax()))
               << "at pixel " << i << ", channel " << k << ", n = " << n()
               << ", kc = " << kc();

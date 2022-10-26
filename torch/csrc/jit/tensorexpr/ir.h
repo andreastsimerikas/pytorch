@@ -731,7 +731,7 @@ class TORCH_API Intrinsics : public ExprNode<Intrinsics> {
       const std::vector<ExprHandle>& params) {
     // NOLINTNEXTLINE(cppcoreguidelines-init-variables)
     std::vector<ExprPtr> params_nodes(params.size());
-    for (size_t i = 0; i < params.size(); i++) {
+    for(const auto i : c10::irange(params.size())) {
       params_nodes[i] = params[i].node();
     }
     return ExprHandle(alloc<Intrinsics>(op_type, params_nodes));

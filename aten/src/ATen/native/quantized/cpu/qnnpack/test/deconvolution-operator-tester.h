@@ -379,7 +379,7 @@ class DeconvolutionOperatorTester {
     std::vector<uint8_t> kernelZeroPoints(num_zero_points_padded, 127);
 
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(input.begin(), input.end(), std::ref(u8rng));
       std::generate(kernel.begin(), kernel.end(), std::ref(u8rng));
       std::generate(bias.begin(), bias.end(), std::ref(s32rng));
@@ -389,11 +389,11 @@ class DeconvolutionOperatorTester {
       std::fill(output.begin(), output.end(), 0xA5);
       std::fill(accumulators.begin(), accumulators.end(), 0);
 
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t oy = 0; oy < outputHeight(); oy++) {
-          for (size_t ox = 0; ox < outputWidth(); ox++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t oc = 0; oc < groupOutputChannels(); oc++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto oy : c10::irange(outputHeight())) {
+          for(const auto ox : c10::irange(outputWidth())) {
+            for(const auto g : c10::irange(groups())) {
+              for(const auto oc : c10::irange(groupOutputChannels())) {
                 accumulators
                     [(((i * outputHeight() + oy) * outputWidth() + ox) *
                           groups() +
@@ -405,20 +405,20 @@ class DeconvolutionOperatorTester {
           }
         }
       }
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t oy = 0; oy < outputHeight(); oy++) {
-          for (size_t ox = 0; ox < outputWidth(); ox++) {
-            for (size_t ky = 0; ky < kernelHeight(); ky++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto oy : c10::irange(outputHeight())) {
+          for(const auto ox : c10::irange(outputWidth())) {
+            for(const auto ky : c10::irange(kernelHeight())) {
               const size_t y = oy + paddingHeight() - ky * dilationHeight();
               const size_t iy = y / strideHeight();
               if (iy * strideHeight() == y && iy < inputHeight()) {
-                for (size_t kx = 0; kx < kernelWidth(); kx++) {
+                for(const auto kx : c10::irange(kernelWidth())) {
                   const size_t x = ox + paddingWidth() - kx * dilationWidth();
                   const size_t ix = x / strideWidth();
                   if (ix * strideWidth() == x && ix < inputWidth()) {
-                    for (size_t g = 0; g < groups(); g++) {
-                      for (size_t oc = 0; oc < groupOutputChannels(); oc++) {
-                        for (size_t ic = 0; ic < groupInputChannels(); ic++) {
+                    for(const auto g : c10::irange(groups())) {
+                      for(const auto oc : c10::irange(groupOutputChannels())) {
+                        for(const auto ic : c10::irange(groupInputChannels())) {
                           accumulators
                               [(((i * outputHeight() + oy) * outputWidth() +
                                  ox) *
@@ -570,11 +570,11 @@ class DeconvolutionOperatorTester {
           ASSERT_TRUE(false);
       }
 
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t y = 0; y < outputHeight(); y++) {
-          for (size_t x = 0; x < outputWidth(); x++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t c = 0; c < groupOutputChannels(); c++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto y : c10::irange(outputHeight())) {
+          for(const auto x : c10::irange(outputWidth())) {
+            for(const auto g : c10::irange(groups())) {
+              for(const auto c : c10::irange(groupOutputChannels())) {
                 const double scaledAccumulator =
                     accumulators
                         [(((i * outputHeight() + y) * outputWidth() + x) *

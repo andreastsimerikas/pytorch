@@ -89,7 +89,7 @@ void Transform::PatternMatchHelper(
 
     // Try adding each parent and child of every node in the subgraph,
     // and see if we can accept it.
-    for (size_t i = 0; i < subgraph.size(); i++) {
+    for(const auto i : c10::irange(subgraph.size())) {
       int x = subgraph[i];
       TryNeighbors(
           graph,
@@ -136,7 +136,7 @@ void Transform::PatternMatchHelper(
 
     // For every current subgraph, we consider all nodes to be
     // the next candidate node, as long as it isn't already matched.
-    for (size_t i = 0; i < graph.size(); i++) {
+    for(const auto i : c10::irange(graph.size())) {
       if (std::find(subgraph.begin(), subgraph.end(), i) == subgraph.end()) {
         // Then we try appending it to the subgraph.
         if (!matched.at(i) && PatternRule(graph, subgraph, i)) {

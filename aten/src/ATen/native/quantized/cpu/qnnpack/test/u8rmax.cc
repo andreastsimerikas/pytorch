@@ -17,7 +17,7 @@
 #if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
 TEST(U8RMAX__NEON, n_lt_16) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t n = 1; n < 16; n++) {
+  for(const auto n : c10::irange(1, 16)) {
     RMaxMicrokernelTester().n(n).test(pytorch_u8rmax_ukernel__neon);
   }
 }
@@ -36,7 +36,7 @@ TEST(U8RMAX__NEON, n_div_16) {
 
 TEST(U8RMAX__NEON, n_gt_16) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t n = 16; n < 32; n++) {
+  for(const auto n : c10::irange(16, 32)) {
     RMaxMicrokernelTester().n(n).test(pytorch_u8rmax_ukernel__neon);
   }
 }
@@ -45,7 +45,7 @@ TEST(U8RMAX__NEON, n_gt_16) {
 #if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
 TEST(U8RMAX__SSE2, n_lt_16) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t n = 1; n < 16; n++) {
+  for(const auto n : c10::irange(1, 16)) {
     RMaxMicrokernelTester().n(n).test(pytorch_u8rmax_ukernel__sse2);
   }
 }
@@ -64,7 +64,7 @@ TEST(U8RMAX__SSE2, n_div_16) {
 
 TEST(U8RMAX__SSE2, n_gt_16) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t n = 17; n < 32; n++) {
+  for(const auto n : c10::irange(17, 32)) {
     RMaxMicrokernelTester().n(n).test(pytorch_u8rmax_ukernel__sse2);
   }
 }

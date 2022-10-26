@@ -29,14 +29,14 @@ TEST(U8CLAMP__NEON, n_div_8) {
 
 TEST(U8CLAMP__NEON, n_gt_8) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t n = 9; n < 16; n++) {
+  for(const auto n : c10::irange(9, 16)) {
     ClampMicrokernelTester().n(n).test(pytorch_u8clamp_ukernel__neon);
   }
 }
 
 TEST(U8CLAMP__NEON, n_lt_8) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t n = 1; n < 8; n++) {
+  for(const auto n : c10::irange(1, 8)) {
     ClampMicrokernelTester().n(n).test(pytorch_u8clamp_ukernel__neon);
   }
 }
@@ -85,14 +85,14 @@ TEST(U8CLAMP__SSE2, n_div_8) {
 
 TEST(U8CLAMP__SSE2, n_gt_8) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t n = 9; n < 16; n++) {
+  for(const auto n : c10::irange(9, 16)) {
     ClampMicrokernelTester().n(n).test(pytorch_u8clamp_ukernel__sse2);
   }
 }
 
 TEST(U8CLAMP__SSE2, n_lt_8) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t n = 1; n < 8; n++) {
+  for(const auto n : c10::irange(1, 8)) {
     ClampMicrokernelTester().n(n).test(pytorch_u8clamp_ukernel__sse2);
   }
 }

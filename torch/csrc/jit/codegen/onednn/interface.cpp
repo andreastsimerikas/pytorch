@@ -127,7 +127,7 @@ Operation createLlgaGuardKernel(const Node* node) {
 #ifdef GRAPH_DEBUG_ENABLED
     GRAPH_DEBUG("num_inputs to guard: ", num_inputs);
 #endif
-    for (size_t i = 0; i < num_inputs; i++) {
+    for(const auto i : c10::irange(num_inputs)) {
 #ifdef GRAPH_DEBUG_ENABLED
       GRAPH_DEBUG("checking input ", i);
 #endif

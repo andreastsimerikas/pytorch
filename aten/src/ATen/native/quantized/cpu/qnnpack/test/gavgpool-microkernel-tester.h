@@ -150,7 +150,7 @@ class GAvgPoolMicrokernelTester {
     std::vector<uint8_t> yRef(n());
     std::vector<float> yFP(n());
     std::vector<int32_t> yAcc(n());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(x.begin(), x.end(), std::ref(u8rng));
       std::fill(y.begin(), y.end(), 0xA5);
 
@@ -172,9 +172,9 @@ class GAvgPoolMicrokernelTester {
                   yMax());
 
       /* Compute reference results */
-      for (size_t j = 0; j < n(); j++) {
+      for(const auto j : c10::irange(n())) {
         int32_t acc = scalarQuantizationParams.scalar.bias;
-        for (size_t i = 0; i < m(); i++) {
+        for(const auto i : c10::irange(m())) {
           acc += x[i * xStride() + j];
         }
         yAcc[j] = acc;
@@ -196,7 +196,7 @@ class GAvgPoolMicrokernelTester {
           &quantizationParams);
 
       /* Verify results */
-      for (size_t i = 0; i < n(); i++) {
+      for(const auto i : c10::irange(n())) {
         ASSERT_LE(uint32_t(y[i]), uint32_t(yMax()))
             << "at position " << i << ", m = " << m() << ", n = " << n();
         ASSERT_GE(uint32_t(y[i]), uint32_t(yMin()))
@@ -223,7 +223,7 @@ class GAvgPoolMicrokernelTester {
     std::vector<uint8_t> yRef(n());
     std::vector<float> yFP(n());
     std::vector<int32_t> yAcc(n());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(x.begin(), x.end(), std::ref(u8rng));
       std::fill(y.begin(), y.end(), 0xA5);
 
@@ -245,9 +245,9 @@ class GAvgPoolMicrokernelTester {
                   yMax());
 
       /* Compute reference results */
-      for (size_t j = 0; j < n(); j++) {
+      for(const auto j : c10::irange(n())) {
         int32_t acc = scalarQuantizationParams.scalar.bias;
-        for (size_t i = 0; i < m(); i++) {
+        for(const auto i : c10::irange(m())) {
           acc += x[i * xStride() + j];
         }
 
@@ -271,7 +271,7 @@ class GAvgPoolMicrokernelTester {
           &quantizationParams);
 
       /* Verify results */
-      for (size_t i = 0; i < n(); i++) {
+      for(const auto i : c10::irange(n())) {
         ASSERT_LE(uint32_t(y[i]), uint32_t(yMax()))
             << "at position " << i << ", m = " << m() << ", n = " << n();
         ASSERT_GE(uint32_t(y[i]), uint32_t(yMin()))

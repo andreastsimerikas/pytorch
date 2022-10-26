@@ -191,7 +191,7 @@ TEST_F(RNNTest, CheckOutputValuesMatchPyTorch) {
   for (auto& v : model->parameters()) {
     float size = v.numel();
     auto p = static_cast<float*>(v.storage().data());
-    for (size_t i = 0; i < size; i++) {
+    for(const auto i : c10::irange(size)) {
       p[i] = i / size;
     }
   }
@@ -199,7 +199,7 @@ TEST_F(RNNTest, CheckOutputValuesMatchPyTorch) {
   auto x = torch::empty({3, 4, 2}, torch::requires_grad());
   float size = x.numel();
   auto p = static_cast<float*>(x.storage().data());
-  for (size_t i = 0; i < size; i++) {
+  for(const auto i : c10::irange(size)) {
     p[i] = (size - i) / size;
   }
 
@@ -215,7 +215,7 @@ TEST_F(RNNTest, CheckOutputValuesMatchPyTorch) {
                    0.4183, 0.5147, 0.6822, 0.8064, 0.6726, 0.7968,
                    0.6620, 0.7860, 0.6501, 0.7741, 0.7889, 0.9003,
                    0.7769, 0.8905, 0.7635, 0.8794, 0.7484, 0.8666};
-  for (size_t i = 0; i < 3 * 4 * 2; i++) {
+  for(const auto i : c10::irange(3 * 4 * 2)) {
     ASSERT_LT(std::abs(flat[i].item<float>() - c_out[i]), 1e-3);
   }
 
@@ -251,7 +251,7 @@ TEST_F(RNNTest, CheckOutputValuesMatchPyTorch) {
       1.5329,
       1.0931,
       1.4911};
-  for (size_t i = 0; i < 16; i++) {
+  for(const auto i : c10::irange(16)) {
     ASSERT_LT(std::abs(flat[i].item<float>() - h_out[i]), 1e-3);
   }
 }

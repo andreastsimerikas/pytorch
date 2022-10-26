@@ -206,7 +206,7 @@ class GemmMicrokernelTester {
 
     const uint8_t* aPtr = a.data() + 8;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(a.begin(), a.end(), std::ref(u8rng));
       std::generate(b.begin(), b.end(), std::ref(u8rng));
       std::generate(bias.begin(), bias.end(), std::ref(s32rng));
@@ -244,9 +244,9 @@ class GemmMicrokernelTester {
 
       /* Compute 32-bit results and output quantization arguments */
       std::fill(acc.begin(), acc.end(), 0);
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
-          for (size_t kIndex = 0; kIndex < k(); kIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
+          for(const auto kIndex : c10::irange(k())) {
             ASSERT_LE(n(), packedN());
             ASSERT_LT(mIndex * n() + nIndex, acc.size());
             ASSERT_LT(mIndex * k() + kIndex, a.size());
@@ -307,8 +307,8 @@ class GemmMicrokernelTester {
           0,
           &quantizationParams);
 
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
 #if defined(__arm__) || defined(_M_ARM)
           cRef[mIndex * n() + nIndex] = pytorch_qnnp_fp32_requantize_magic(
               acc[mIndex * n() + nIndex], scalarRequantizationParams, nIndex);
@@ -319,8 +319,8 @@ class GemmMicrokernelTester {
         }
       }
 
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
           ASSERT_LE(uint32_t(c[mIndex * cStride() + nIndex]), uint32_t(qmax()));
           ASSERT_GE(uint32_t(c[mIndex * cStride() + nIndex]), uint32_t(qmin()));
           ASSERT_EQ(
@@ -360,7 +360,7 @@ class GemmMicrokernelTester {
 
     const uint8_t* aPtr = a.data() + 8;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(a.begin(), a.end(), std::ref(u8rng));
       std::generate(b.begin(), b.end(), std::ref(u8rng));
       std::generate(bias.begin(), bias.end(), std::ref(s32rng));
@@ -405,9 +405,9 @@ class GemmMicrokernelTester {
           std::ref(f32rng));
       /* Compute 32-bit results and output quantization arguments */
       std::fill(acc.begin(), acc.end(), 0);
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
-          for (size_t kIndex = 0; kIndex < k(); kIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
+          for(const auto kIndex : c10::irange(k())) {
             ASSERT_LE(n(), packedN());
             ASSERT_LT(mIndex * n() + nIndex, acc.size());
             ASSERT_LT(mIndex * k() + kIndex, a.size());
@@ -442,8 +442,8 @@ class GemmMicrokernelTester {
           0,
           &quantizationParams);
 
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
           ASSERT_EQ(
               c[mIndex * cStride() + nIndex],
               acc[mIndex * n() + nIndex])
@@ -483,7 +483,7 @@ class GemmMicrokernelTester {
 
     const uint8_t* aPtr = a.data() + 8;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(a.begin(), a.end(), std::ref(u8rng));
       std::generate(b.begin(), b.end(), std::ref(u8rng));
       std::generate(bias.begin(), bias.end(), std::ref(s32rng));
@@ -520,13 +520,13 @@ class GemmMicrokernelTester {
           *std::max_element(b.cbegin(), b.cend()),
           *std::min_element(b.cbegin(), b.cend()));
 
-      for (size_t ksIndex = 0; ksIndex < ks(); ksIndex++) {
-        for (size_t mIndex = 0; mIndex < mr(); mIndex++) {
+      for(const auto ksIndex : c10::irange(ks())) {
+        for(const auto mIndex : c10::irange(mr())) {
           im2col[ksIndex * mr() + mIndex] = aPtr + aStride() * mIndex;
         }
       }
       std::shuffle(im2col.begin(), im2col.end(), rng);
-      for (size_t ksIndex = 0; ksIndex < ks(); ksIndex++) {
+      for(const auto ksIndex : c10::irange(ks())) {
         for (size_t mIndex = m(); mIndex < mr(); mIndex++) {
           im2col[ksIndex * mr() + mIndex] = im2col[ksIndex * mr() + m() - 1];
         }
@@ -534,9 +534,9 @@ class GemmMicrokernelTester {
 
       /* Compute 32-bit results and output quantization arguments */
       std::fill(acc.begin(), acc.end(), 0);
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
-          for (size_t ksIndex = 0; ksIndex < ks(); ksIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
+          for(const auto ksIndex : c10::irange(ks())) {
             for (size_t kBlockStart = 0; kBlockStart < k();
                  kBlockStart += kr()) {
               for (size_t kBlockOffset = 0;
@@ -609,8 +609,8 @@ class GemmMicrokernelTester {
           0,
           &quantizationParams);
 
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
 #if defined(__arm__) || defined(_M_ARM)
           cRef[mIndex * n() + nIndex] = pytorch_qnnp_fp32_requantize_magic(
               acc[mIndex * n() + nIndex], scalarRequantizationParams, nIndex);
@@ -621,8 +621,8 @@ class GemmMicrokernelTester {
         }
       }
 
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
           ASSERT_LE(uint32_t(c[mIndex * cStride() + nIndex]), uint32_t(qmax()));
           ASSERT_GE(uint32_t(c[mIndex * cStride() + nIndex]), uint32_t(qmin()));
           ASSERT_EQ(
@@ -684,7 +684,7 @@ class GemmMicrokernelTester {
 
     const uint8_t* aPtr = a.data() + 8;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(a.begin(), a.end(), std::ref(u8rng));
       std::generate(b.begin(), b.end(), std::ref(u8rng));
       std::generate(bias.begin(), bias.end(), std::ref(s32rng));
@@ -712,9 +712,9 @@ class GemmMicrokernelTester {
           *std::min_element(b.cbegin(), b.cend()));
 
       std::fill(aRowSums.begin(), aRowSums.end(), 0);
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
         int32_t sum = 0;
-        for (size_t kIndex = 0; kIndex < k(); kIndex++) {
+        for(const auto kIndex : c10::irange(k())) {
           sum += int32_t(aPtr[mIndex * aStride() + kIndex]);
         }
         aRowSums[mIndex] = -sum * int32_t(bZeroPoint());
@@ -722,9 +722,9 @@ class GemmMicrokernelTester {
 
       /* Compute 32-bit results and output quantization arguments */
       std::fill(acc.begin(), acc.end(), 0);
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
-          for (size_t kIndex = 0; kIndex < k(); kIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
+          for(const auto kIndex : c10::irange(k())) {
             ASSERT_LE(n(), packedN());
             ASSERT_LT(mIndex * n() + nIndex, acc.size());
             ASSERT_LT(mIndex * k() + kIndex, a.size());
@@ -776,15 +776,15 @@ class GemmMicrokernelTester {
           cStride(),
           &requantizationParams);
 
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
           cRef[mIndex * n() + nIndex] = pytorch_qnnp_q31_requantize(
               acc[mIndex * n() + nIndex], scalarRequantizationParams);
         }
       }
 
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
           ASSERT_LE(uint32_t(c[mIndex * cStride() + nIndex]), uint32_t(qmax()));
           ASSERT_GE(uint32_t(c[mIndex * cStride() + nIndex]), uint32_t(qmin()));
           ASSERT_EQ(c[mIndex * cStride() + nIndex], cRef[mIndex * n() + nIndex])
@@ -825,7 +825,7 @@ class GemmMicrokernelTester {
     struct pytorch_qnnp_fp16_clamping_params clampingParams;
     clampingParams.scale = UINT16_C(0x3C00) /* 1.0 */;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(a.begin(), a.end(), std::ref(rng));
       std::generate(b.begin(), b.end(), std::ref(rng));
       std::generate(bias.begin(), bias.end(), std::ref(rng));
@@ -835,8 +835,8 @@ class GemmMicrokernelTester {
       std::fill(packedW.begin(), packedW.end(), 0);
       pytorch_pack_hgemm_w(n(), k(), np(), kr(), b.data(), bias.data(), packedW.data());
 
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
           for (size_t kBlockStart = 0; kBlockStart < k(); kBlockStart += kr()) {
             for (size_t kBlockOffset = 0;
                  kBlockOffset < std::min(k() - kBlockStart, kr());
@@ -865,8 +865,8 @@ class GemmMicrokernelTester {
       clampingParams.max = fp16_ieee_from_fp32_value(cMax);
       clampingParams.min = fp16_ieee_from_fp32_value(cMin);
 
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
           cRef[mIndex * n() + nIndex] =
               std::max(std::min(cRef[mIndex * n() + nIndex], cMax), cMin);
         }
@@ -884,8 +884,8 @@ class GemmMicrokernelTester {
           &clampingParams);
 
       /* Validate micro-kernel outputs */
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
           ASSERT_NEAR(
               fp16_ieee_to_fp32_value(c[mIndex * cStride() + nIndex]),
               cRef[mIndex * n() + nIndex],
@@ -899,7 +899,7 @@ class GemmMicrokernelTester {
         }
       }
       /* Check that micro-kernel did not overwrite data beyond bounds */
-      for (size_t mIndex = 0; mIndex < m() - 1; mIndex++) {
+      for(const auto mIndex : c10::irange(m() - 1)) {
         for (size_t nIndex = n(); nIndex < cStride(); nIndex++) {
           ASSERT_EQ(UINT16_C(0x7E00) /* NaN */, c[mIndex * cStride() + nIndex])
               << "at " << mIndex << ", " << nIndex
@@ -935,7 +935,7 @@ class GemmMicrokernelTester {
     std::vector<float> c((mr() - 1) * cStride() + nr());
     std::vector<float> cRef(m() * n());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(a.begin(), a.end(), std::ref(rng));
       std::generate(b.begin(), b.end(), std::ref(rng));
       std::generate(bias.begin(), bias.end(), std::ref(rng));
@@ -945,9 +945,9 @@ class GemmMicrokernelTester {
       std::fill(packedW.begin(), packedW.end(), 0.0f);
       pytorch_pack_sgemm_w(n(), k(), np(), kr(), b.data(), bias.data(), packedW.data());
 
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
-          for (size_t kIndex = 0; kIndex < k(); kIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
+          for(const auto kIndex : c10::irange(k())) {
             ASSERT_LE(n(), packedN());
             ASSERT_LT(mIndex * n() + nIndex, cRef.size());
             cRef[mIndex * n() + nIndex] +=
@@ -967,8 +967,8 @@ class GemmMicrokernelTester {
           .min = cMin,
       };
 
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
           cRef[mIndex * n() + nIndex] =
               std::max(std::min(cRef[mIndex * n() + nIndex], cMax), cMin);
         }
@@ -986,8 +986,8 @@ class GemmMicrokernelTester {
           &clampingParams);
 
       /* Validate micro-kernel outputs */
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
           ASSERT_NEAR(
               c[mIndex * cStride() + nIndex],
               cRef[mIndex * n() + nIndex],
@@ -1000,7 +1000,7 @@ class GemmMicrokernelTester {
         }
       }
       /* Check that micro-kernel did not overwrite data beyond bounds */
-      for (size_t mIndex = 0; mIndex < m() - 1; mIndex++) {
+      for(const auto mIndex : c10::irange(m() - 1)) {
         for (size_t nIndex = n(); nIndex < cStride(); nIndex++) {
           ASSERT_TRUE(std::isnan(c[mIndex * cStride() + nIndex]))
               << "at " << mIndex << ", " << nIndex
@@ -1036,7 +1036,7 @@ class GemmMicrokernelTester {
     std::vector<float> cRef(m() * n());
     std::vector<const float*> im2col(mr() * ks());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(a.begin(), a.end(), std::ref(f32rng));
       std::generate(b.begin(), b.end(), std::ref(f32rng));
       std::generate(bias.begin(), bias.end(), std::ref(f32rng));
@@ -1054,22 +1054,22 @@ class GemmMicrokernelTester {
           *std::max_element(b.cbegin(), b.cend()),
           *std::min_element(b.cbegin(), b.cend()));
 
-      for (size_t ksIndex = 0; ksIndex < ks(); ksIndex++) {
-        for (size_t mIndex = 0; mIndex < mr(); mIndex++) {
+      for(const auto ksIndex : c10::irange(ks())) {
+        for(const auto mIndex : c10::irange(mr())) {
           im2col[ksIndex * mr() + mIndex] = a.data() + aStride() * mIndex;
         }
       }
       std::shuffle(im2col.begin(), im2col.end(), rng);
-      for (size_t ksIndex = 0; ksIndex < ks(); ksIndex++) {
+      for(const auto ksIndex : c10::irange(ks())) {
         for (size_t mIndex = m(); mIndex < mr(); mIndex++) {
           im2col[ksIndex * mr() + mIndex] = im2col[ksIndex * mr() + m() - 1];
         }
       }
 
       std::fill(cRef.begin(), cRef.end(), 0.0);
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
-          for (size_t ksIndex = 0; ksIndex < ks(); ksIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
+          for(const auto ksIndex : c10::irange(ks())) {
             for (size_t kBlockStart = 0; kBlockStart < k();
                  kBlockStart += kr()) {
               for (size_t kBlockOffset = 0;
@@ -1103,8 +1103,8 @@ class GemmMicrokernelTester {
       const float cRefMin = accMin + float(qmin()) / 255.0f * (accMax - accMin);
       const float cRefMax =
           accMax - float(255 - qmax()) / 255.0f * (accMax - accMin);
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
           cRef[mIndex * n() + nIndex] =
               std::min(cRef[mIndex * n() + nIndex], cRefMax);
           cRef[mIndex * n() + nIndex] =
@@ -1127,8 +1127,8 @@ class GemmMicrokernelTester {
           cStride() * sizeof(float),
           &clampingParams);
 
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
           ASSERT_LE(c[mIndex * cStride() + nIndex], cRefMax);
           ASSERT_GE(c[mIndex * cStride() + nIndex], cRefMin);
           ASSERT_NEAR(

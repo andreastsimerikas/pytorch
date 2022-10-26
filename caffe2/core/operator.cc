@@ -554,7 +554,7 @@ TensorShapes InferBlobShapesAndTypes(
         CAFFE_ENFORCE(split_cache.find(op.input(1)) != split_cache.end());
         vector<TensorShape> cached = split_cache[op.input(1)];
         CAFFE_ENFORCE_EQ(op.output_size(), cached.size());
-        for (size_t i = 0; i < cached.size(); i++) {
+        for(const auto i : c10::irange(cached.size())) {
           blob_desc[op.output(i)] = cached[i];
         }
         continue;
@@ -572,7 +572,7 @@ TensorShapes InferBlobShapesAndTypes(
           CaffeMap<string, string> grads_to_params =
               GradientMakerBase::MatchGradsToParams(op);
 
-          for (size_t i = 0; i < out.size(); i++) {
+          for(const auto i : c10::irange(out.size())) {
             if (out[i].unknown_shape()) {
               // NOLINTNEXTLINE(performance-unnecessary-copy-initialization)
               std::string gradout = op.output(i);
@@ -621,7 +621,7 @@ TensorShapes InferBlobShapesAndTypes(
               out.size());
         }
       } else {
-        for (size_t i = 0; i < out.size(); i++) {
+        for(const auto i : c10::irange(out.size())) {
           blob_desc[op.output(i)] = out[i];
         }
       }
@@ -878,14 +878,14 @@ void OperatorBase::AddRelatedBlobInfo(EnforceNotMet* err) {
   bool found_output = false;
   if (err->caller() != nullptr) {
     std::ostringstream oss;
-    for (size_t i = 0; i < inputs_.size(); i++) {
+    for(const auto i : c10::irange(inputs_.size())) {
       if (inputs_[i]->GetRaw() == err->caller()) {
         found_input = true;
         oss << "while accessing input: " << debug_def().input(i);
         break;
       }
     }
-    for (size_t i = 0; i < outputs_.size(); i++) {
+    for(const auto i : c10::irange(outputs_.size())) {
       if (outputs_[i]->GetRaw() == err->caller()) {
         found_output = true;
         if (found_input) {

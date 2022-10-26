@@ -1020,7 +1020,7 @@ class TensorExprFuser {
       // group from memory format is separately handled in NNC output
 
       // all non-Tensor arguments must be constant
-      for (size_t i = 1; i < node->inputs().size(); i++) {
+      for(const auto i : c10::irange(1, node->inputs().size())) {
         if (node->inputs().at(i)->node()->kind() != prim::Constant) {
           return false;
         }

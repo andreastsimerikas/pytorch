@@ -1111,7 +1111,7 @@ struct PythonPrintImpl {
       } break;
       case prim::CallFunction: {
         stmt << useOf(node->inputs().at(0)) << "(";
-        for (size_t i = 1; i < node->inputs().size(); i++) {
+        for(const auto i : c10::irange(1, node->inputs().size())) {
           stmt << useOf(node->inputs()[i]) << ", ";
         }
         stmt << ")";
@@ -1121,7 +1121,7 @@ struct PythonPrintImpl {
         const auto& methodName = node->s(attr::name);
         stmt << "(" << useOf(self) << ")"
              << "." << methodName << "(";
-        for (size_t i = 1; i < node->inputs().size(); i++) {
+        for(const auto i : c10::irange(1, node->inputs().size())) {
           stmt << useOf(node->inputs()[i]) << ", ";
         }
         stmt << ")";

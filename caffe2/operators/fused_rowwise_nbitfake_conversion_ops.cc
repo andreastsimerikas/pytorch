@@ -75,7 +75,7 @@ void convertfp32fp32(float* dst, const float* src, size_t N) {
 }
 
 void convertfp16fp32(float* dst, const at::Half* src, size_t N) {
-  for (size_t i = 0; i < N; i++) {
+  for(const auto i : c10::irange(N)) {
     dst[i] = src[i];
   }
 }

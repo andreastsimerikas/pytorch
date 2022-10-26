@@ -51,10 +51,10 @@ void pytorch_q8dwconv_ukernel_mp8x27__sse2(
   const size_t yz_bias_size = (cr_block * sizeof(int32_t));
   const size_t yz_weight_size = yz_block * cr_block;
 
-  for (size_t output_y = 0; output_y < output_height; output_y++) {
+  for(const auto output_y : c10::irange(output_height)) {
     const uint8_t** input_row_start = input;
-    for (size_t output_x = 0; output_x < output_width; output_x++) {
-      for (size_t c = 0; c < channels; c++) {
+    for(const auto output_x : c10::irange(output_width)) {
+      for(const auto c : c10::irange(channels)) {
         int32_t accumulator =
             (weights_ptr.as_int32_ptr +
              ((c / cr_block) * (yz_bias_size + yz_weight_size) /

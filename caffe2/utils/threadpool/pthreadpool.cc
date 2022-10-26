@@ -94,8 +94,8 @@ void legacy_pthreadpool_compute_2d(
 {
   if (threadpool == NULL) {
     /* No thread pool provided: execute function sequentially on the calling thread */
-    for (size_t i = 0; i < range_i; i++) {
-      for (size_t j = 0; j < range_j; j++) {
+    for(const auto i : c10::irange(range_i)) {
+      for(const auto j : c10::irange(range_j)) {
         function(argument, i, j);
       }
     }

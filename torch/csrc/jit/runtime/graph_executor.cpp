@@ -287,7 +287,7 @@ struct DifferentiableGraphBackward : public autograd::Node {
           // this undefined gradient actually corresponds to a tensor list
           if (input_tensor_lists_.count(output_index) != 0) {
             size_t list_size = input_tensor_lists_[output_index];
-            for (size_t i = 0; i < list_size; i++) {
+            for(const auto i : c10::irange(list_size)) {
               produceOutput(output_index++, {}, outputs);
             }
           } else {

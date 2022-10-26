@@ -269,7 +269,7 @@ inline bool FunctionSchema::isForwardCompatibleWith(
   }
 
   // make sure among the default args, they are forward compatible
-  for (size_t i = 0; i < std::min(old_out_start_idx, new_out_start_idx); i++) {
+  for(const auto i : c10::irange(std::min(old_out_start_idx, new_out_start_idx))) {
     if (!arguments().at(i).isForwardCompatibleWith(old.arguments().at(i))) {
       if (why_not) {
         why_not

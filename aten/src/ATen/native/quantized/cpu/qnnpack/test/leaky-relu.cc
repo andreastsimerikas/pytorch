@@ -15,7 +15,7 @@ TEST(LEAKY_RELU_OP, zero_batch) {
 }
 
 TEST(LEAKY_RELU_OP, unit_batch) {
-  for (size_t channels = 1; channels < 100; channels++) {
+  for(const auto channels : c10::irange(1, 100)) {
     LeakyReLUOperatorTester()
         .batchSize(1)
         .channels(channels)
@@ -117,7 +117,7 @@ TEST(LEAKY_RELU_OP, unit_batch_with_output_zero_point) {
 }
 
 TEST(LEAKY_RELU_OP, small_batch) {
-  for (size_t channels = 1; channels < 100; channels++) {
+  for(const auto channels : c10::irange(1, 100)) {
     LeakyReLUOperatorTester()
         .batchSize(3)
         .channels(channels)

@@ -42,7 +42,7 @@ std::vector<std::vector<ForPtr>> GetAllPerfectlyNestedLoopNests(
     return all_nested_loops;
   }
   nested_loops.push_back(loops[0]);
-  for (size_t i = 1; i < loops.size(); i++) {
+  for(const auto i : c10::irange(1, loops.size())) {
     auto last_loop = nested_loops.back();
     auto next_loop = loops[i];
     if (last_loop->body()->nstmts() == 1 &&

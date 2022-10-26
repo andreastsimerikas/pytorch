@@ -1196,7 +1196,7 @@ Tensor TensorExprKernel::bindInput(const torch::jit::Value* input) {
           size_handles,
           [&](const std::vector<VarHandle>& axes) {
             ExprHandle idx = 0;
-            for (size_t i = 0; i < axes.size(); i++) {
+            for(const auto i : c10::irange(axes.size())) {
               idx = idx + axes[i] * inputTensorStrides[i];
             }
             return inBuffer.load(idx);

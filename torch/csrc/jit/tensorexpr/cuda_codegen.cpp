@@ -930,7 +930,7 @@ void CudaCodeGen::Initialize() {
   os() << "void " << func_name << "(";
   // NOLINTNEXTLINE(cppcoreguidelines-init-variables)
   const std::vector<BufferArg> buffer_args = this->buffer_args();
-  for (size_t i = 0; i < buffer_args.size(); i++) {
+  for(const auto i : c10::irange(buffer_args.size())) {
     if (i > 0) {
       os() << ", ";
     }
@@ -995,7 +995,7 @@ void CudaCodeGen::Initialize() {
   // Check that all block extents had been set.
   const std::vector<ExprPtr>& gpu_block_extents =
       metavar_rewriter_->gpu_block_extents();
-  for (size_t i = 0; i < gpu_block_extents.size(); i++) {
+  for(const auto i : c10::irange(gpu_block_extents.size())) {
     if (!gpu_block_extents[i]) {
       throw std::runtime_error("Missing gpu_block_index: " + std::to_string(i));
     }
@@ -1104,7 +1104,7 @@ void CudaCodeGen::call_with_numel(void** args, int64_t numel) {
   // Why? See some details here:
   // https://stackoverflow.com/questions/34388712/cannot-understand-how-jcuda-culaunchkernel-work
   std::vector<void*> ptr_to_args(buffer_args.size());
-  for (size_t i = 0; i < buffer_args.size(); i++) {
+  for(const auto i : c10::irange(buffer_args.size())) {
     ptr_to_args[i] =
         // NOLINTNEXTLINE: const_cast
         buffer_args[i].isVar() ? args[i] : const_cast<void**>(&args[i]);
@@ -1165,7 +1165,7 @@ void CudaCodeGen::call_raw(const std::vector<void*>& raw_args) {
       extent_args.push_back(raw_args[i]);
     }
   }
-  for (size_t i = 0; i < gpu_block_extents.size(); i++) {
+  for(const auto i : c10::irange(gpu_block_extents.size())) {
     if (gpu_block_extents[i]->isConstant()) {
       gpu_block_extents_v[i] = immediateAs<int64_t>(gpu_block_extents[i]);
       continue;
@@ -1178,7 +1178,7 @@ void CudaCodeGen::call_raw(const std::vector<void*>& raw_args) {
           block_extents_eval_[i].value<int64_t>(extent_args);
     }
   }
-  for (size_t i = 0; i < gpu_thread_extents.size(); i++) {
+  for(const auto i : c10::irange(gpu_thread_extents.size())) {
     if (gpu_thread_extents[i]->isConstant()) {
       gpu_thread_extents_v[i] = immediateAs<int64_t>(gpu_thread_extents[i]);
       continue;
@@ -1212,7 +1212,7 @@ void CudaCodeGen::call_raw(const std::vector<void*>& raw_args) {
   // arguments.
   // Why? See some details here:
   // https://stackoverflow.com/questions/34388712/cannot-understand-how-jcuda-culaunchkernel-work
-  for (size_t i = 0; i < buffer_args.size(); i++) {
+  for(const auto i : c10::irange(buffer_args.size())) {
     ptr_to_args[i] =
         buffer_args[i].isVar() ? raw_args[i] : const_cast<void**>(&raw_args[i]);
   }
@@ -1268,7 +1268,7 @@ void CudaCodeGen::call(const std::vector<CallArg>& args) {
   auto const& buffer_args = this->buffer_args();
   // NOLINTNEXTLINE(cppcoreguidelines-init-variables)
   std::vector<void*> raw_args(buffer_args.size());
-  for (size_t i = 0; i < buffer_args.size(); i++) {
+  for(const auto i : c10::irange(buffer_args.size())) {
     auto const& bufferArg = buffer_args[i];
     auto const& callArg = args[i];
     raw_args[i] = argToPtr(bufferArg, callArg);

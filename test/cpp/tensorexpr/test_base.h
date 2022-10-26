@@ -52,7 +52,7 @@ void ExpectAllNear(
     V threshold,
     const std::string& name = "") {
   ASSERT_EQ(v1.size(), v2.size());
-  for (size_t i = 0; i < v1.size(); i++) {
+  for(const auto i : c10::irange(v1.size())) {
     ASSERT_NEAR(v1[i], v2[i], threshold);
   }
 }
@@ -63,7 +63,7 @@ void ExpectAllNear(
     const U& val,
     V threshold,
     const std::string& name = "") {
-  for (size_t i = 0; i < vec.size(); i++) {
+  for(const auto i : c10::irange(vec.size())) {
     ASSERT_NEAR(vec[i], val, threshold);
   }
 }

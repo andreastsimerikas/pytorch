@@ -116,22 +116,22 @@ class SoftArgMaxOperatorTester {
     std::vector<uint8_t> output(
         (batchSize() - 1) * outputStride() + channels());
     std::vector<float> outputRef(batchSize() * channels());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(input.begin(), input.end(), std::ref(u8rng));
       std::fill(output.begin(), output.end(), 0xA5);
 
       /* Compute reference results */
-      for (size_t i = 0; i < batchSize(); i++) {
+      for(const auto i : c10::irange(batchSize())) {
         const int32_t maxInput = *std::max_element(
             input.data() + i * inputStride(),
             input.data() + i * inputStride() + channels());
         float sumExp = 0.0f;
-        for (size_t c = 0; c < channels(); c++) {
+        for(const auto c : c10::irange(channels())) {
           sumExp +=
               exp((int32_t(input[i * inputStride() + c]) - maxInput) *
                   inputScale());
         }
-        for (size_t c = 0; c < channels(); c++) {
+        for(const auto c : c10::irange(channels())) {
           outputRef[i * channels() + c] =
               exp((int32_t(input[i * inputStride() + c]) - maxInput) *
                   inputScale()) /
@@ -176,8 +176,8 @@ class SoftArgMaxOperatorTester {
       softArgMaxOp = nullptr;
 
       /* Verify results */
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t c = 0; c < channels(); c++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto c : c10::irange(channels())) {
           ASSERT_NEAR(
               float(int32_t(output[i * outputStride() + c])),
               outputRef[i * channels() + c],

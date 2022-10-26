@@ -6,7 +6,7 @@ namespace jit {
 bool nonConstantParameters(Node* n) {
   // Checks if the parameters, not including the
   // first param are all constants.
-  for (size_t i = 1; i < n->inputs().size(); i++) {
+  for(const auto i : c10::irange(1, n->inputs().size())) {
     if (n->inputs().at(i)->node()->kind() != prim::Constant) {
       return true;
     }

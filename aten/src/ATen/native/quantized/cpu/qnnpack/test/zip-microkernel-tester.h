@@ -59,7 +59,7 @@ class ZipMicrokernelTester {
     std::vector<uint8_t> x(n() * g());
     std::vector<uint8_t> y(g() * n());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(x.begin(), x.end(), std::ref(u8rng));
       std::fill(y.begin(), y.end(), 0xA5);
 
@@ -67,8 +67,8 @@ class ZipMicrokernelTester {
       xzip(n(), x.data(), y.data());
 
       /* Verify results */
-      for (size_t i = 0; i < n(); i++) {
-        for (size_t j = 0; j < g(); j++) {
+      for(const auto i : c10::irange(n())) {
+        for(const auto j : c10::irange(g())) {
           ASSERT_EQ(uint32_t(y[i * g() + j]), uint32_t(x[j * n() + i]))
               << "at element " << i << ", group " << j;
         }
@@ -84,7 +84,7 @@ class ZipMicrokernelTester {
     std::vector<uint8_t> x(n() * g());
     std::vector<uint8_t> y(g() * n());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(x.begin(), x.end(), std::ref(u8rng));
       std::fill(y.begin(), y.end(), 0xA5);
 
@@ -92,8 +92,8 @@ class ZipMicrokernelTester {
       xzip(n(), g(), x.data(), y.data());
 
       /* Verify results */
-      for (size_t i = 0; i < n(); i++) {
-        for (size_t j = 0; j < g(); j++) {
+      for(const auto i : c10::irange(n())) {
+        for(const auto j : c10::irange(g())) {
           ASSERT_EQ(uint32_t(y[i * g() + j]), uint32_t(x[j * n() + i]))
               << "at element " << i << ", group " << j;
         }

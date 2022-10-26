@@ -15,7 +15,7 @@ bool ConditionalOp<CPUContext>::RunOnDevice() {
   CAFFE_ENFORCE(dataT.dim() >= 1);
   CAFFE_ENFORCE(dataT.sizes()[0] == condition.sizes()[0]);
   CAFFE_ENFORCE_EQ(dataT.dim(), dataF.dim());
-  for (size_t i = 0; i < dataT.sizes().size(); i++) {
+  for(const auto i : c10::irange(dataT.sizes().size())) {
     CAFFE_ENFORCE(dataT.sizes().at(i) == dataF.sizes().at(i));
   }
   const auto innerSize = dataT.size_from_dim(1);

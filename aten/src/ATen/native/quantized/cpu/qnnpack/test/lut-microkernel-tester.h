@@ -57,7 +57,7 @@ class LUTMicrokernelTester {
     std::vector<uint8_t> t(256);
     std::vector<uint8_t> y(n());
     std::vector<uint8_t> yRef(n());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(x.begin(), x.end(), std::ref(u8rng));
       std::generate(t.begin(), t.end(), std::ref(u8rng));
       if (inplace()) {
@@ -68,7 +68,7 @@ class LUTMicrokernelTester {
       const uint8_t* xData = inplace() ? y.data() : x.data();
 
       /* Compute reference results */
-      for (size_t i = 0; i < n(); i++) {
+      for(const auto i : c10::irange(n())) {
         yRef[i] = t[xData[i]];
       }
 
@@ -76,7 +76,7 @@ class LUTMicrokernelTester {
       x8lut(n(), xData, t.data(), y.data());
 
       /* Verify results */
-      for (size_t i = 0; i < n(); i++) {
+      for(const auto i : c10::irange(n())) {
         ASSERT_EQ(uint32_t(yRef[i]), uint32_t(y[i]))
             << "at position " << i << ", n = " << n();
       }

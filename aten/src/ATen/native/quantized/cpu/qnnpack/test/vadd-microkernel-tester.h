@@ -146,7 +146,7 @@ class VAddMicrokernelTester {
     std::vector<uint8_t> y(n());
     std::vector<float> yFP(n());
     std::vector<uint8_t> yRef(n());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(a.begin(), a.end(), std::ref(u8rng));
       std::generate(b.begin(), b.end(), std::ref(u8rng));
       if (inplaceA() || inplaceB()) {
@@ -179,7 +179,7 @@ class VAddMicrokernelTester {
                   qmax());
 
       /* Compute reference results */
-      for (size_t i = 0; i < n(); i++) {
+      for(const auto i : c10::irange(n())) {
         yFP[i] = float(yZeroPoint()) +
             float(int32_t(aData[i]) - int32_t(aZeroPoint())) *
                 (aScale() / yScale()) +
@@ -195,7 +195,7 @@ class VAddMicrokernelTester {
       q8vadd(n(), aData, bData, y.data(), &quantizationParams);
 
       /* Verify results */
-      for (size_t i = 0; i < n(); i++) {
+      for(const auto i : c10::irange(n())) {
         ASSERT_LE(uint32_t(y[i]), uint32_t(qmax()))
             << "at " << i << ", n = " << n();
         ASSERT_GE(uint32_t(y[i]), uint32_t(qmin()))

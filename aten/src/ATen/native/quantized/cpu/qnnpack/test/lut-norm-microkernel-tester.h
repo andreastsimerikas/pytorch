@@ -61,7 +61,7 @@ class LUTNormMicrokernelTester {
     std::vector<uint32_t> t(256);
     std::vector<uint8_t> y(n());
     std::vector<float> yRef(n());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(x.begin(), x.end(), std::ref(u8rng));
       std::generate(t.begin(), t.end(), std::ref(u32rng));
       if (inplace()) {
@@ -73,10 +73,10 @@ class LUTNormMicrokernelTester {
 
       /* Compute reference results */
       uint32_t sum = 0;
-      for (size_t i = 0; i < n(); i++) {
+      for(const auto i : c10::irange(n())) {
         sum += t[xData[i]];
       }
-      for (size_t i = 0; i < n(); i++) {
+      for(const auto i : c10::irange(n())) {
         yRef[i] = 256.0f * float(t[xData[i]]) / float(sum);
         yRef[i] = std::min(yRef[i], 255.0f);
       }
@@ -85,7 +85,7 @@ class LUTNormMicrokernelTester {
       u8lut32norm(n(), xData, t.data(), y.data());
 
       /* Verify results */
-      for (size_t i = 0; i < n(); i++) {
+      for(const auto i : c10::irange(n())) {
         ASSERT_NEAR(yRef[i], float(y[i]), 0.5f)
             << "at position " << i << ", n = " << n() << ", sum = " << sum;
       }

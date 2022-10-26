@@ -467,7 +467,7 @@ struct FileCheckImpl {
 
   void doChecks(const std::shared_ptr<Source>& source) {
     SourceRange prev(source, 0, 0);
-    for (size_t i = 0; i < groups.size(); i++) {
+    for(const auto i : c10::irange(groups.size())) {
       const auto& curr_group = groups[i];
       CheckType type = curr_group.at(0).type_;
       if (type != CHECK_NOT) {

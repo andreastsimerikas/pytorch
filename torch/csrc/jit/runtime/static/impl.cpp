@@ -1121,7 +1121,7 @@ void BlockRunner::verify_and_correct_memory_overlap(ProcessedNode& n) {
       n.verify_and_correct_memory_overlap();
     } else {
       bool overlap_detected_with_fast_check = false;
-      for (size_t i = 0; i < n.outputs().size(); i++) {
+      for(const auto i : c10::irange(n.outputs().size())) {
         auto& output = n.Output(i);
         if (output.isTensor()) {
           overlap_detected_with_fast_check |=

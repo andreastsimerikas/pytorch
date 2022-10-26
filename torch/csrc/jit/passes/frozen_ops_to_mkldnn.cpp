@@ -824,7 +824,7 @@ void ComputeSubgraphInMKLDNN(Node* subgraph_node) {
 }
 
 bool nonConstantParameters(Node* n) {
-  for (size_t i = 1; i < n->inputs().size(); i++) {
+  for(const auto i : c10::irange(1, n->inputs().size())) {
     if (n->inputs().at(i)->node()->kind() != prim::Constant) {
       return true;
     }

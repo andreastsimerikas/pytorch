@@ -106,7 +106,7 @@ TEST(Q8GEMM_4x8__AARCH32_NEON, k_eq_8_nozp) {
 
 TEST(Q8GEMM_4x8__AARCH32_NEON, k_gt_8) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester().mr(4).nr(8).np(8).kr(1).m(4).n(8).k(k).test(
         pytorch_q8gemm_ukernel_4x8__aarch32_neon);
   }
@@ -114,7 +114,7 @@ TEST(Q8GEMM_4x8__AARCH32_NEON, k_gt_8) {
 
 TEST(Q8GEMM_4x8__AARCH32_NEON, k_gt_8_strided_a) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -130,7 +130,7 @@ TEST(Q8GEMM_4x8__AARCH32_NEON, k_gt_8_strided_a) {
 
 TEST(Q8GEMM_4x8__AARCH32_NEON, k_gt_8_strided_c) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -146,7 +146,7 @@ TEST(Q8GEMM_4x8__AARCH32_NEON, k_gt_8_strided_c) {
 
 TEST(Q8GEMM_4x8__AARCH32_NEON, k_gt_8_azp0) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -162,7 +162,7 @@ TEST(Q8GEMM_4x8__AARCH32_NEON, k_gt_8_azp0) {
 
 TEST(Q8GEMM_4x8__AARCH32_NEON, k_gt_8_bzp0) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -178,7 +178,7 @@ TEST(Q8GEMM_4x8__AARCH32_NEON, k_gt_8_bzp0) {
 
 TEST(Q8GEMM_4x8__AARCH32_NEON, k_gt_8_nozp) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -195,7 +195,7 @@ TEST(Q8GEMM_4x8__AARCH32_NEON, k_gt_8_nozp) {
 
 TEST(Q8GEMM_4x8__AARCH32_NEON, k_gt_8_subtile) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     for (uint32_t m = 1; m <= 4; m++) {
       for (uint32_t n = 1; n <= 8; n++) {
         GemmMicrokernelTester()
@@ -368,7 +368,7 @@ TEST(Q8GEMM_DQ_4x8__AARCH32_NEON, k_eq_8_nozp) {
 
 TEST(Q8GEMM_DQ_4x8__AARCH32_NEON, k_gt_8) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester().mr(4).nr(8).np(8).kr(1).m(4).n(8).k(k).test(
         pytorch_q8gemm_dq_ukernel_4x8__aarch32_neon);
   }
@@ -376,7 +376,7 @@ TEST(Q8GEMM_DQ_4x8__AARCH32_NEON, k_gt_8) {
 
 TEST(Q8GEMM_DQ_4x8__AARCH32_NEON, k_gt_8_strided_a) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -392,7 +392,7 @@ TEST(Q8GEMM_DQ_4x8__AARCH32_NEON, k_gt_8_strided_a) {
 
 TEST(Q8GEMM_DQ_4x8__AARCH32_NEON, k_gt_8_strided_c) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -408,7 +408,7 @@ TEST(Q8GEMM_DQ_4x8__AARCH32_NEON, k_gt_8_strided_c) {
 
 TEST(Q8GEMM_DQ_4x8__AARCH32_NEON, k_gt_8_azp0) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -424,7 +424,7 @@ TEST(Q8GEMM_DQ_4x8__AARCH32_NEON, k_gt_8_azp0) {
 
 TEST(Q8GEMM_DQ_4x8__AARCH32_NEON, k_gt_8_bzp0) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -440,7 +440,7 @@ TEST(Q8GEMM_DQ_4x8__AARCH32_NEON, k_gt_8_bzp0) {
 
 TEST(Q8GEMM_DQ_4x8__AARCH32_NEON, k_gt_8_nozp) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -457,7 +457,7 @@ TEST(Q8GEMM_DQ_4x8__AARCH32_NEON, k_gt_8_nozp) {
 
 TEST(Q8GEMM_DQ_4x8__AARCH32_NEON, k_gt_8_subtile) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     for (uint32_t m = 1; m <= 4; m++) {
       for (uint32_t n = 1; n <= 8; n++) {
         GemmMicrokernelTester()
@@ -626,7 +626,7 @@ TEST(Q8GEMM_4x8c2_XZP__AARCH32_NEON, k_eq_8_nozp) {
 
 TEST(Q8GEMM_4x8c2_XZP__AARCH32_NEON, k_gt_8) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester().mr(4).nr(8).np(8).kr(2).m(4).n(8).k(k).test(
         pytorch_q8gemm_xzp_ukernel_4x8c2__aarch32_neon);
   }
@@ -634,7 +634,7 @@ TEST(Q8GEMM_4x8c2_XZP__AARCH32_NEON, k_gt_8) {
 
 TEST(Q8GEMM_4x8c2_XZP__AARCH32_NEON, k_gt_8_strided_a) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -650,7 +650,7 @@ TEST(Q8GEMM_4x8c2_XZP__AARCH32_NEON, k_gt_8_strided_a) {
 
 TEST(Q8GEMM_4x8c2_XZP__AARCH32_NEON, k_gt_8_strided_c) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -666,7 +666,7 @@ TEST(Q8GEMM_4x8c2_XZP__AARCH32_NEON, k_gt_8_strided_c) {
 
 TEST(Q8GEMM_4x8c2_XZP__AARCH32_NEON, k_gt_8_azp0) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -682,7 +682,7 @@ TEST(Q8GEMM_4x8c2_XZP__AARCH32_NEON, k_gt_8_azp0) {
 
 TEST(Q8GEMM_4x8c2_XZP__AARCH32_NEON, k_gt_8_bzp0) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -698,7 +698,7 @@ TEST(Q8GEMM_4x8c2_XZP__AARCH32_NEON, k_gt_8_bzp0) {
 
 TEST(Q8GEMM_4x8c2_XZP__AARCH32_NEON, k_gt_8_nozp) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -715,7 +715,7 @@ TEST(Q8GEMM_4x8c2_XZP__AARCH32_NEON, k_gt_8_nozp) {
 
 TEST(Q8GEMM_4x8c2_XZP__AARCH32_NEON, k_gt_8_subtile) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     for (uint32_t m = 1; m <= 4; m++) {
       for (uint32_t n = 1; n <= 8; n++) {
         GemmMicrokernelTester()
@@ -877,14 +877,14 @@ TEST(Q8GEMM_8x8__AARCH64_NEON, k_eq_8_nozp) {
 }
 
 TEST(Q8GEMM_8x8__AARCH64_NEON, k_gt_8) {
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester().mr(8).nr(8).np(8).kr(1).m(8).n(8).k(k).test(
         pytorch_q8gemm_ukernel_8x8__aarch64_neon);
   }
 }
 
 TEST(Q8GEMM_8x8__AARCH64_NEON, k_gt_8_strided_a) {
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -899,7 +899,7 @@ TEST(Q8GEMM_8x8__AARCH64_NEON, k_gt_8_strided_a) {
 }
 
 TEST(Q8GEMM_8x8__AARCH64_NEON, k_gt_8_strided_c) {
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -914,7 +914,7 @@ TEST(Q8GEMM_8x8__AARCH64_NEON, k_gt_8_strided_c) {
 }
 
 TEST(Q8GEMM_8x8__AARCH64_NEON, k_gt_8_azp0) {
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -929,7 +929,7 @@ TEST(Q8GEMM_8x8__AARCH64_NEON, k_gt_8_azp0) {
 }
 
 TEST(Q8GEMM_8x8__AARCH64_NEON, k_gt_8_bzp0) {
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -944,7 +944,7 @@ TEST(Q8GEMM_8x8__AARCH64_NEON, k_gt_8_bzp0) {
 }
 
 TEST(Q8GEMM_8x8__AARCH64_NEON, k_gt_8_nozp) {
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -960,7 +960,7 @@ TEST(Q8GEMM_8x8__AARCH64_NEON, k_gt_8_nozp) {
 }
 
 TEST(Q8GEMM_8x8__AARCH64_NEON, k_gt_8_subtile) {
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     for (uint32_t m = 1; m <= 8; m++) {
       for (uint32_t n = 1; n <= 8; n++) {
         GemmMicrokernelTester()
@@ -1120,14 +1120,14 @@ TEST(Q8GEMM_DQ_8x8__AARCH64_NEON, k_eq_8_nozp) {
 }
 
 TEST(Q8GEMM_DQ_8x8__AARCH64_NEON, k_gt_8) {
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester().mr(8).nr(8).np(8).kr(1).m(8).n(8).k(k).test(
         pytorch_q8gemm_dq_ukernel_8x8__aarch64_neon);
   }
 }
 
 TEST(Q8GEMM_DQ_8x8__AARCH64_NEON, k_gt_8_strided_a) {
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -1142,7 +1142,7 @@ TEST(Q8GEMM_DQ_8x8__AARCH64_NEON, k_gt_8_strided_a) {
 }
 
 TEST(Q8GEMM_DQ_8x8__AARCH64_NEON, k_gt_8_strided_c) {
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -1157,7 +1157,7 @@ TEST(Q8GEMM_DQ_8x8__AARCH64_NEON, k_gt_8_strided_c) {
 }
 
 TEST(Q8GEMM_DQ_8x8__AARCH64_NEON, k_gt_8_azp0) {
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -1172,7 +1172,7 @@ TEST(Q8GEMM_DQ_8x8__AARCH64_NEON, k_gt_8_azp0) {
 }
 
 TEST(Q8GEMM_DQ_8x8__AARCH64_NEON, k_gt_8_bzp0) {
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -1187,7 +1187,7 @@ TEST(Q8GEMM_DQ_8x8__AARCH64_NEON, k_gt_8_bzp0) {
 }
 
 TEST(Q8GEMM_DQ_8x8__AARCH64_NEON, k_gt_8_nozp) {
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -1203,7 +1203,7 @@ TEST(Q8GEMM_DQ_8x8__AARCH64_NEON, k_gt_8_nozp) {
 }
 
 TEST(Q8GEMM_DQ_8x8__AARCH64_NEON, k_gt_8_subtile) {
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     for (uint32_t m = 1; m <= 8; m++) {
       for (uint32_t n = 1; n <= 8; n++) {
         GemmMicrokernelTester()
@@ -1370,7 +1370,7 @@ TEST(Q8GEMM_4x8__NEON, k_eq_8_nozp) {
 
 TEST(Q8GEMM_4x8__NEON, k_gt_8) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester().mr(4).nr(8).np(8).kr(1).m(4).n(8).k(k).test(
         pytorch_q8gemm_ukernel_4x8__neon);
   }
@@ -1378,7 +1378,7 @@ TEST(Q8GEMM_4x8__NEON, k_gt_8) {
 
 TEST(Q8GEMM_4x8__NEON, k_gt_8_strided_a) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -1394,7 +1394,7 @@ TEST(Q8GEMM_4x8__NEON, k_gt_8_strided_a) {
 
 TEST(Q8GEMM_4x8__NEON, k_gt_8_strided_c) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -1410,7 +1410,7 @@ TEST(Q8GEMM_4x8__NEON, k_gt_8_strided_c) {
 
 TEST(Q8GEMM_4x8__NEON, k_gt_8_azp0) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -1426,7 +1426,7 @@ TEST(Q8GEMM_4x8__NEON, k_gt_8_azp0) {
 
 TEST(Q8GEMM_4x8__NEON, k_gt_8_bzp0) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -1442,7 +1442,7 @@ TEST(Q8GEMM_4x8__NEON, k_gt_8_bzp0) {
 
 TEST(Q8GEMM_4x8__NEON, k_gt_8_nozp) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -1459,7 +1459,7 @@ TEST(Q8GEMM_4x8__NEON, k_gt_8_nozp) {
 
 TEST(Q8GEMM_4x8__NEON, k_gt_8_subtile) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     for (uint32_t m = 1; m <= 4; m++) {
       for (uint32_t n = 1; n <= 8; n++) {
         GemmMicrokernelTester()
@@ -1632,7 +1632,7 @@ TEST(Q8GEMM_DQ_4x8__NEON, k_eq_8_nozp) {
 
 TEST(Q8GEMM_DQ_4x8__NEON, k_gt_8) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester().mr(4).nr(8).np(8).kr(1).m(4).n(8).k(k).test(
         pytorch_q8gemm_dq_ukernel_4x8__neon);
   }
@@ -1640,7 +1640,7 @@ TEST(Q8GEMM_DQ_4x8__NEON, k_gt_8) {
 
 TEST(Q8GEMM_DQ_4x8__NEON, k_gt_8_strided_a) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -1656,7 +1656,7 @@ TEST(Q8GEMM_DQ_4x8__NEON, k_gt_8_strided_a) {
 
 TEST(Q8GEMM_DQ_4x8__NEON, k_gt_8_strided_c) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -1672,7 +1672,7 @@ TEST(Q8GEMM_DQ_4x8__NEON, k_gt_8_strided_c) {
 
 TEST(Q8GEMM_DQ_4x8__NEON, k_gt_8_azp0) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -1688,7 +1688,7 @@ TEST(Q8GEMM_DQ_4x8__NEON, k_gt_8_azp0) {
 
 TEST(Q8GEMM_DQ_4x8__NEON, k_gt_8_bzp0) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -1704,7 +1704,7 @@ TEST(Q8GEMM_DQ_4x8__NEON, k_gt_8_bzp0) {
 
 TEST(Q8GEMM_DQ_4x8__NEON, k_gt_8_nozp) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -1721,7 +1721,7 @@ TEST(Q8GEMM_DQ_4x8__NEON, k_gt_8_nozp) {
 
 TEST(Q8GEMM_DQ_4x8__NEON, k_gt_8_subtile) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     for (uint32_t m = 1; m <= 4; m++) {
       for (uint32_t n = 1; n <= 8; n++) {
         GemmMicrokernelTester()
@@ -1890,7 +1890,7 @@ TEST(Q8GEMM_8x8__NEON, k_eq_8_nozp) {
 
 TEST(Q8GEMM_8x8__NEON, k_gt_8) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester().mr(8).nr(8).np(8).kr(1).m(8).n(8).k(k).test(
         pytorch_q8gemm_ukernel_8x8__neon);
   }
@@ -1898,7 +1898,7 @@ TEST(Q8GEMM_8x8__NEON, k_gt_8) {
 
 TEST(Q8GEMM_8x8__NEON, k_gt_8_strided_a) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -1914,7 +1914,7 @@ TEST(Q8GEMM_8x8__NEON, k_gt_8_strided_a) {
 
 TEST(Q8GEMM_8x8__NEON, k_gt_8_strided_c) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -1930,7 +1930,7 @@ TEST(Q8GEMM_8x8__NEON, k_gt_8_strided_c) {
 
 TEST(Q8GEMM_8x8__NEON, k_gt_8_azp0) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -1946,7 +1946,7 @@ TEST(Q8GEMM_8x8__NEON, k_gt_8_azp0) {
 
 TEST(Q8GEMM_8x8__NEON, k_gt_8_bzp0) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -1962,7 +1962,7 @@ TEST(Q8GEMM_8x8__NEON, k_gt_8_bzp0) {
 
 TEST(Q8GEMM_8x8__NEON, k_gt_8_nozp) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(8)
         .nr(8)
@@ -1979,7 +1979,7 @@ TEST(Q8GEMM_8x8__NEON, k_gt_8_nozp) {
 
 TEST(Q8GEMM_8x8__NEON, k_gt_8_subtile) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     for (uint32_t m = 1; m <= 8; m++) {
       for (uint32_t n = 1; n <= 8; n++) {
         GemmMicrokernelTester()
@@ -2148,7 +2148,7 @@ TEST(Q8GEMM_6x4__NEON, k_eq_8_nozp) {
 
 TEST(Q8GEMM_6x4__NEON, k_gt_8) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester().mr(6).nr(4).np(4).kr(1).m(6).n(4).k(k).test(
         pytorch_q8gemm_ukernel_6x4__neon);
   }
@@ -2156,7 +2156,7 @@ TEST(Q8GEMM_6x4__NEON, k_gt_8) {
 
 TEST(Q8GEMM_6x4__NEON, k_gt_8_strided_a) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(6)
         .nr(4)
@@ -2172,7 +2172,7 @@ TEST(Q8GEMM_6x4__NEON, k_gt_8_strided_a) {
 
 TEST(Q8GEMM_6x4__NEON, k_gt_8_strided_c) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(6)
         .nr(4)
@@ -2188,7 +2188,7 @@ TEST(Q8GEMM_6x4__NEON, k_gt_8_strided_c) {
 
 TEST(Q8GEMM_6x4__NEON, k_gt_8_azp0) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(6)
         .nr(4)
@@ -2204,7 +2204,7 @@ TEST(Q8GEMM_6x4__NEON, k_gt_8_azp0) {
 
 TEST(Q8GEMM_6x4__NEON, k_gt_8_bzp0) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(6)
         .nr(4)
@@ -2220,7 +2220,7 @@ TEST(Q8GEMM_6x4__NEON, k_gt_8_bzp0) {
 
 TEST(Q8GEMM_6x4__NEON, k_gt_8_nozp) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(6)
         .nr(4)
@@ -2237,7 +2237,7 @@ TEST(Q8GEMM_6x4__NEON, k_gt_8_nozp) {
 
 TEST(Q8GEMM_6x4__NEON, k_gt_8_subtile) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     for (uint32_t m = 1; m <= 6; m++) {
       for (uint32_t n = 1; n <= 4; n++) {
         GemmMicrokernelTester()
@@ -2398,7 +2398,7 @@ TEST(Q8GEMM_4x8c2_XZP__NEON, k_eq_8_nozp) {
 
 TEST(Q8GEMM_4x8c2_XZP__NEON, k_gt_8) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester().mr(4).nr(8).np(8).kr(2).m(4).n(8).k(k).test(
         pytorch_q8gemm_xzp_ukernel_4x8c2__neon);
   }
@@ -2406,7 +2406,7 @@ TEST(Q8GEMM_4x8c2_XZP__NEON, k_gt_8) {
 
 TEST(Q8GEMM_4x8c2_XZP__NEON, k_gt_8_strided_a) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -2422,7 +2422,7 @@ TEST(Q8GEMM_4x8c2_XZP__NEON, k_gt_8_strided_a) {
 
 TEST(Q8GEMM_4x8c2_XZP__NEON, k_gt_8_strided_c) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -2438,7 +2438,7 @@ TEST(Q8GEMM_4x8c2_XZP__NEON, k_gt_8_strided_c) {
 
 TEST(Q8GEMM_4x8c2_XZP__NEON, k_gt_8_azp0) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -2454,7 +2454,7 @@ TEST(Q8GEMM_4x8c2_XZP__NEON, k_gt_8_azp0) {
 
 TEST(Q8GEMM_4x8c2_XZP__NEON, k_gt_8_bzp0) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -2470,7 +2470,7 @@ TEST(Q8GEMM_4x8c2_XZP__NEON, k_gt_8_bzp0) {
 
 TEST(Q8GEMM_4x8c2_XZP__NEON, k_gt_8_nozp) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -2487,7 +2487,7 @@ TEST(Q8GEMM_4x8c2_XZP__NEON, k_gt_8_nozp) {
 
 TEST(Q8GEMM_4x8c2_XZP__NEON, k_gt_8_subtile) {
   TEST_REQUIRES_ARM_NEON;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     for (uint32_t m = 1; m <= 4; m++) {
       for (uint32_t n = 1; n <= 8; n++) {
         GemmMicrokernelTester()
@@ -2658,7 +2658,7 @@ TEST(Q8GEMM_2x4c8__SSE2, k_eq_8_nozp) {
 
 TEST(Q8GEMM_2x4c8__SSE2, k_gt_8) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester().mr(2).nr(4).np(1).kr(8).m(2).n(4).k(k).test(
         pytorch_q8gemm_ukernel_2x4c8__sse2);
   }
@@ -2666,7 +2666,7 @@ TEST(Q8GEMM_2x4c8__SSE2, k_gt_8) {
 
 TEST(Q8GEMM_2x4c8__SSE2, k_gt_8_strided_a) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(2)
         .nr(4)
@@ -2682,7 +2682,7 @@ TEST(Q8GEMM_2x4c8__SSE2, k_gt_8_strided_a) {
 
 TEST(Q8GEMM_2x4c8__SSE2, k_gt_8_strided_c) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(2)
         .nr(4)
@@ -2698,7 +2698,7 @@ TEST(Q8GEMM_2x4c8__SSE2, k_gt_8_strided_c) {
 
 TEST(Q8GEMM_2x4c8__SSE2, k_gt_8_azp0) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(2)
         .nr(4)
@@ -2714,7 +2714,7 @@ TEST(Q8GEMM_2x4c8__SSE2, k_gt_8_azp0) {
 
 TEST(Q8GEMM_2x4c8__SSE2, k_gt_8_bzp0) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(2)
         .nr(4)
@@ -2730,7 +2730,7 @@ TEST(Q8GEMM_2x4c8__SSE2, k_gt_8_bzp0) {
 
 TEST(Q8GEMM_2x4c8__SSE2, k_gt_8_nozp) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(2)
         .nr(4)
@@ -2747,7 +2747,7 @@ TEST(Q8GEMM_2x4c8__SSE2, k_gt_8_nozp) {
 
 TEST(Q8GEMM_2x4c8__SSE2, k_gt_8_subtile) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     for (uint32_t m = 1; m <= 2; m++) {
       for (uint32_t n = 1; n <= 4; n++) {
         GemmMicrokernelTester()
@@ -3211,7 +3211,7 @@ TEST(Q8GEMM_4x4c2__SSE2, k_eq_8_nozp) {
 
 TEST(Q8GEMM_4x4c2__SSE2, k_gt_8) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester().mr(4).nr(4).np(4).kr(2).m(4).n(4).k(k).test(
         pytorch_q8gemm_ukernel_4x4c2__sse2);
   }
@@ -3219,7 +3219,7 @@ TEST(Q8GEMM_4x4c2__SSE2, k_gt_8) {
 
 TEST(Q8GEMM_4x4c2__SSE2, k_gt_8_strided_a) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(4)
@@ -3235,7 +3235,7 @@ TEST(Q8GEMM_4x4c2__SSE2, k_gt_8_strided_a) {
 
 TEST(Q8GEMM_4x4c2__SSE2, k_gt_8_strided_c) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(4)
@@ -3251,7 +3251,7 @@ TEST(Q8GEMM_4x4c2__SSE2, k_gt_8_strided_c) {
 
 TEST(Q8GEMM_4x4c2__SSE2, k_gt_8_azp0) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(4)
@@ -3267,7 +3267,7 @@ TEST(Q8GEMM_4x4c2__SSE2, k_gt_8_azp0) {
 
 TEST(Q8GEMM_4x4c2__SSE2, k_gt_8_bzp0) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(4)
@@ -3283,7 +3283,7 @@ TEST(Q8GEMM_4x4c2__SSE2, k_gt_8_bzp0) {
 
 TEST(Q8GEMM_4x4c2__SSE2, k_gt_8_nozp) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(4)
@@ -3300,7 +3300,7 @@ TEST(Q8GEMM_4x4c2__SSE2, k_gt_8_nozp) {
 
 TEST(Q8GEMM_4x4c2__SSE2, k_gt_8_subtile) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     for (uint32_t m = 1; m <= 4; m++) {
       for (uint32_t n = 1; n <= 4; n++) {
         GemmMicrokernelTester()
@@ -3651,7 +3651,7 @@ TEST(Q8GEMM_DQ_4x4c2__SSE2, k_eq_8_nozp) {
 
 TEST(Q8GEMM_DQ_4x4c2__SSE2, k_gt_8) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester().mr(4).nr(4).np(4).kr(2).m(4).n(4).k(k).test(
         pytorch_q8gemm_dq_ukernel_4x4c2__sse2);
   }
@@ -3659,7 +3659,7 @@ TEST(Q8GEMM_DQ_4x4c2__SSE2, k_gt_8) {
 
 TEST(Q8GEMM_DQ_4x4c2__SSE2, k_gt_8_strided_a) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(4)
@@ -3675,7 +3675,7 @@ TEST(Q8GEMM_DQ_4x4c2__SSE2, k_gt_8_strided_a) {
 
 TEST(Q8GEMM_DQ_4x4c2__SSE2, k_gt_8_strided_c) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(4)
@@ -3691,7 +3691,7 @@ TEST(Q8GEMM_DQ_4x4c2__SSE2, k_gt_8_strided_c) {
 
 TEST(Q8GEMM_DQ_4x4c2__SSE2, k_gt_8_azp0) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(4)
@@ -3707,7 +3707,7 @@ TEST(Q8GEMM_DQ_4x4c2__SSE2, k_gt_8_azp0) {
 
 TEST(Q8GEMM_DQ_4x4c2__SSE2, k_gt_8_bzp0) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(4)
@@ -3723,7 +3723,7 @@ TEST(Q8GEMM_DQ_4x4c2__SSE2, k_gt_8_bzp0) {
 
 TEST(Q8GEMM_DQ_4x4c2__SSE2, k_gt_8_nozp) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     GemmMicrokernelTester()
         .mr(4)
         .nr(4)
@@ -3740,7 +3740,7 @@ TEST(Q8GEMM_DQ_4x4c2__SSE2, k_gt_8_nozp) {
 
 TEST(Q8GEMM_DQ_4x4c2__SSE2, k_gt_8_subtile) {
   TEST_REQUIRES_X86_SSE2;
-  for (size_t k = 9; k < 16; k++) {
+  for(const auto k : c10::irange(9, 16)) {
     for (uint32_t m = 1; m <= 4; m++) {
       for (uint32_t n = 1; n <= 4; n++) {
         GemmMicrokernelTester()

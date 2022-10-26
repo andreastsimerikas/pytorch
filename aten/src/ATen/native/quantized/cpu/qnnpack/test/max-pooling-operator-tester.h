@@ -381,20 +381,20 @@ class MaxPoolingOperatorTester {
         channels());
     std::vector<uint8_t> outputRef(
         batchSize() * outputHeight() * outputWidth() * channels());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(input.begin(), input.end(), std::ref(u8rng));
       std::fill(output.begin(), output.end(), 0xA5);
 
       /* Compute reference results */
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t oy = 0; oy < outputHeight(); oy++) {
-          for (size_t ox = 0; ox < outputWidth(); ox++) {
-            for (size_t c = 0; c < channels(); c++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto oy : c10::irange(outputHeight())) {
+          for(const auto ox : c10::irange(outputWidth())) {
+            for(const auto c : c10::irange(channels())) {
               uint8_t maxValue = 0;
-              for (size_t py = 0; py < poolingHeight(); py++) {
+              for(const auto py : c10::irange(poolingHeight())) {
                 const size_t iy = oy * strideHeight() + py * dilationHeight() -
                     paddingHeight();
-                for (size_t px = 0; px < poolingWidth(); px++) {
+                for(const auto px : c10::irange(poolingWidth())) {
                   const size_t ix = ox * strideWidth() + px * dilationWidth() -
                       paddingWidth();
                   if (ix < inputWidth() && iy < inputHeight()) {
@@ -463,10 +463,10 @@ class MaxPoolingOperatorTester {
       maxPoolingOp = nullptr;
 
       /* Verify results */
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t y = 0; y < outputHeight(); y++) {
-          for (size_t x = 0; x < outputWidth(); x++) {
-            for (size_t c = 0; c < channels(); c++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto y : c10::irange(outputHeight())) {
+          for(const auto x : c10::irange(outputWidth())) {
+            for(const auto c : c10::irange(channels())) {
               ASSERT_LE(
                   uint32_t(output
                                [((i * outputHeight() + y) * outputWidth() + x) *
@@ -519,20 +519,20 @@ class MaxPoolingOperatorTester {
         batchSize() * outputHeight() * outputWidth() * channels());
     std::vector<float> nextOutputRef(
         nextBatchSize() * nextOutputHeight() * nextOutputWidth() * channels());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(input.begin(), input.end(), std::ref(u8rng));
       std::fill(output.begin(), output.end(), 0xA5);
 
       /* Compute reference results */
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t oy = 0; oy < outputHeight(); oy++) {
-          for (size_t ox = 0; ox < outputWidth(); ox++) {
-            for (size_t c = 0; c < channels(); c++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto oy : c10::irange(outputHeight())) {
+          for(const auto ox : c10::irange(outputWidth())) {
+            for(const auto c : c10::irange(channels())) {
               uint8_t maxValue = 0;
-              for (size_t py = 0; py < poolingHeight(); py++) {
+              for(const auto py : c10::irange(poolingHeight())) {
                 const size_t iy = oy * strideHeight() + py * dilationHeight() -
                     paddingHeight();
-                for (size_t px = 0; px < poolingWidth(); px++) {
+                for(const auto px : c10::irange(poolingWidth())) {
                   const size_t ix = ox * strideWidth() + px * dilationWidth() -
                       paddingWidth();
                   if (ix < inputWidth() && iy < inputHeight()) {
@@ -596,10 +596,10 @@ class MaxPoolingOperatorTester {
           pytorch_qnnp_run_operator(maxPoolingOp, nullptr /* thread pool */));
 
       /* Verify results of the first run */
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t y = 0; y < outputHeight(); y++) {
-          for (size_t x = 0; x < outputWidth(); x++) {
-            for (size_t c = 0; c < channels(); c++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto y : c10::irange(outputHeight())) {
+          for(const auto x : c10::irange(outputWidth())) {
+            for(const auto c : c10::irange(channels())) {
               ASSERT_LE(
                   uint32_t(output
                                [((i * outputHeight() + y) * outputWidth() + x) *
@@ -633,15 +633,15 @@ class MaxPoolingOperatorTester {
       std::fill(output.begin(), output.end(), 0xA5);
 
       /* Compute reference results for the second run */
-      for (size_t i = 0; i < nextBatchSize(); i++) {
-        for (size_t oy = 0; oy < nextOutputHeight(); oy++) {
-          for (size_t ox = 0; ox < nextOutputWidth(); ox++) {
-            for (size_t c = 0; c < channels(); c++) {
+      for(const auto i : c10::irange(nextBatchSize())) {
+        for(const auto oy : c10::irange(nextOutputHeight())) {
+          for(const auto ox : c10::irange(nextOutputWidth())) {
+            for(const auto c : c10::irange(channels())) {
               uint8_t maxValue = 0;
-              for (size_t py = 0; py < poolingHeight(); py++) {
+              for(const auto py : c10::irange(poolingHeight())) {
                 const size_t iy = oy * strideHeight() + py * dilationHeight() -
                     paddingHeight();
-                for (size_t px = 0; px < poolingWidth(); px++) {
+                for(const auto px : c10::irange(poolingWidth())) {
                   const size_t ix = ox * strideWidth() + px * dilationWidth() -
                       paddingWidth();
                   if (ix < nextInputWidth() && iy < nextInputHeight()) {
@@ -691,10 +691,10 @@ class MaxPoolingOperatorTester {
       maxPoolingOp = nullptr;
 
       /* Verify results of the second run */
-      for (size_t i = 0; i < nextBatchSize(); i++) {
-        for (size_t y = 0; y < nextOutputHeight(); y++) {
-          for (size_t x = 0; x < nextOutputWidth(); x++) {
-            for (size_t c = 0; c < channels(); c++) {
+      for(const auto i : c10::irange(nextBatchSize())) {
+        for(const auto y : c10::irange(nextOutputHeight())) {
+          for(const auto x : c10::irange(nextOutputWidth())) {
+            for(const auto c : c10::irange(channels())) {
               ASSERT_LE(
                   uint32_t(
                       output

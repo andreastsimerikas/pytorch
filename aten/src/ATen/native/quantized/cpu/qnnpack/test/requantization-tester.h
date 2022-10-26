@@ -278,7 +278,7 @@ class RequantizationTester {
         std::numeric_limits<uint8_t>::min(),
         std::numeric_limits<uint8_t>::max(),
         outputs.data());
-    for (size_t i = 0; i < inputs.size(); i++) {
+    for(const auto i : c10::irange(inputs.size())) {
       ASSERT_EQ(std::numeric_limits<uint8_t>::max(), outputs[i]);
     }
   }
@@ -286,7 +286,7 @@ class RequantizationTester {
   void testRandomCasesPrecise(pytorch_requantization_function requantize) {
     std::random_device randomDevice;
     std::mt19937 mtRng(randomDevice());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       auto rng = std::bind(std::uniform_int_distribution<uint8_t>(), mtRng);
 
       std::vector<int32_t> inputs(4096);
@@ -296,7 +296,7 @@ class RequantizationTester {
       std::uniform_real_distribution<float> scaleDistribution(
           0x1.000000p-23f, 0x1.FFFFFEp-1f);
       const float scale = scaleDistribution(mtRng);
-      for (size_t i = 0; i < inputs.size(); i++) {
+      for(const auto i : c10::irange(inputs.size())) {
         const uint8_t approximateOutput = rng();
         const int32_t input =
             int32_t(double(approximateOutput) / double(scale));
@@ -318,7 +318,7 @@ class RequantizationTester {
           *std::max_element(outputs.cbegin(), outputs.cend()),
           *std::min_element(outputs.cbegin(), outputs.cend()));
 
-      for (size_t i = 0; i < inputs.size(); i++) {
+      for(const auto i : c10::irange(inputs.size())) {
         const uint8_t referenceOutput = pytorch_scalar_requantize_precise(
             inputs[i],
             scale,
@@ -333,7 +333,7 @@ class RequantizationTester {
   void testRandomCasesApproximate(pytorch_requantization_function requantize) {
     std::random_device randomDevice;
     std::mt19937 mtRng(randomDevice());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       auto rng = std::bind(std::uniform_int_distribution<uint8_t>(), mtRng);
 
       std::vector<int32_t> inputs(4096);
@@ -343,7 +343,7 @@ class RequantizationTester {
       std::uniform_real_distribution<float> scaleDistribution(
           0x1.000000p-23f, 0x1.FFFFFEp-1f);
       const float scale = scaleDistribution(mtRng);
-      for (size_t i = 0; i < inputs.size(); i++) {
+      for(const auto i : c10::irange(inputs.size())) {
         const uint8_t approximateOutput = rng();
         const int32_t input =
             int32_t(double(approximateOutput) / double(scale));
@@ -365,7 +365,7 @@ class RequantizationTester {
           *std::max_element(outputs.cbegin(), outputs.cend()),
           *std::min_element(outputs.cbegin(), outputs.cend()));
 
-      for (size_t i = 0; i < inputs.size(); i++) {
+      for(const auto i : c10::irange(inputs.size())) {
         const double referenceOutput =
             RequantizationTester::requantizeApproximate(
                 inputs[i],
@@ -385,7 +385,7 @@ class RequantizationTester {
       pytorch_requantization_function requantizeReference) {
     std::random_device randomDevice;
     std::mt19937 mtRng(randomDevice());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       auto rng = std::bind(std::uniform_int_distribution<uint8_t>(), mtRng);
 
       std::vector<int32_t> inputs(4096);
@@ -396,7 +396,7 @@ class RequantizationTester {
       std::uniform_real_distribution<float> scaleDistribution(
           0x1.000000p-23f, 0x1.FFFFFEp-1f);
       const float scale = scaleDistribution(mtRng);
-      for (size_t i = 0; i < inputs.size(); i++) {
+      for(const auto i : c10::irange(inputs.size())) {
         const uint8_t approximateOutput = rng();
         const int32_t input =
             int32_t(double(approximateOutput) / double(scale));
@@ -427,7 +427,7 @@ class RequantizationTester {
           *std::max_element(outputs.cbegin(), outputs.cend()),
           *std::min_element(outputs.cbegin(), outputs.cend()));
 
-      for (size_t i = 0; i < inputs.size(); i++) {
+      for(const auto i : c10::irange(inputs.size())) {
         ASSERT_EQ(uint32_t(referenceOutputs[i]), uint32_t(outputs[i]));
       }
     }

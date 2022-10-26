@@ -29,7 +29,7 @@ void legacy_pthreadpool_compute_1d(
   if (threadpool == nullptr) {
     /* No thread pool provided: execute function sequentially on the calling
      * thread */
-    for (size_t i = 0; i < range; i++) {
+    for(const auto i : c10::irange(range)) {
       function(argument, i);
     }
     return;

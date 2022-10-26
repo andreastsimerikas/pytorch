@@ -615,11 +615,11 @@ REGISTER_NATIVE_OPERATOR_FUNCTOR(
 
         const auto& expected_types = node->tys(attr::types);
 
-        for (size_t i = 0; i < num_inputs; i++) {
+        for(const auto i : c10::irange(num_inputs)) {
           p_node->Output(i) = p_node->Input(i);
         }
 
-        for (size_t i = 0; i < num_inputs; i++) {
+        for(const auto i : c10::irange(num_inputs)) {
           auto& input_tensor = p_node->Input(i).toTensor();
           auto* expected_type = expected_types[i]->castRaw<TensorType>();
           if (input_tensor.defined() &&

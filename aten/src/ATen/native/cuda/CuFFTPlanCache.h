@@ -486,7 +486,7 @@ public:
     auto cur_size = _usage_list.size();
     if (cur_size > _max_size) {
       auto delete_it = _usage_list.end();
-      for (size_t i = 0; i < cur_size - _max_size; i++) {
+      for(const auto i : c10::irange(cur_size - _max_size)) {
         delete_it--;
         _cache_map.erase(delete_it->first);
       }

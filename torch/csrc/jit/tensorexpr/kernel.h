@@ -33,7 +33,7 @@ bool matmulIsSupported(const Node* node);
 template <typename T>
 inline std::vector<int64_t> bufferSizes(const T& t) {
   std::vector<int64_t> sizes;
-  for (size_t i = 0; i < t->ndim(); i++) {
+  for(const auto i : c10::irange(t->ndim())) {
     sizes.push_back(*intValue(t->dim(i)));
   }
   return sizes;

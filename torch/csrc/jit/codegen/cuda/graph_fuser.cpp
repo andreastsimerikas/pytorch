@@ -52,7 +52,7 @@ Value* broadcastSizes(at::ArrayRef<Value*> sizes) {
   AT_ASSERT(!sizes.empty());
   Graph* graph = sizes[0]->owningGraph();
   Node* insertion_point = sizes[0]->node()->next();
-  for (size_t i = 1; i < sizes.size(); i++) {
+  for(const auto i : c10::irange(1, sizes.size())) {
     if (insertion_point->isBefore(sizes[i]->node()->next())) {
       insertion_point = sizes[i]->node()->next();
     }

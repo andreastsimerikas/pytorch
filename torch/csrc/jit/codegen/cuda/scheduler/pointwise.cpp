@@ -119,7 +119,7 @@ std::shared_ptr<PointwiseParams> getPointwiseHeuristics(
   auto ref_root = largest_out->getMaybeRFactorDomain();
   std::vector<int64_t> elem_counts(ref_root.size(), 1);
   int64_t n_elems = 1;
-  for (size_t ref_i = 0; ref_i < ref_root.size(); ref_i++) {
+  for(const auto ref_i : c10::irange(ref_root.size())) {
     auto inferred_val =
         runtime_info.expressionEvaluator().evaluate(ref_root[ref_i]->extent());
     TORCH_INTERNAL_ASSERT(

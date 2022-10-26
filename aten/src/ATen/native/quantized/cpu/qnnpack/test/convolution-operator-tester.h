@@ -501,7 +501,7 @@ class ConvolutionOperatorTester {
       (groups() * groupOutputChannels() + 8);
     std::vector<uint8_t> kernelZeroPoints(num_zero_points_padded, 127);
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(input.begin(), input.end(), std::ref(u8rng));
       std::generate(kernel.begin(), kernel.end(), std::ref(u8rng));
       std::generate(bias.begin(), bias.end(), std::ref(s32rng));
@@ -511,12 +511,12 @@ class ConvolutionOperatorTester {
       std::fill(output.begin(), output.end(), 0xA5);
       std::fill(accumulators.begin(), accumulators.end(), 0);
 
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t oz = 0; oz < outputDepth(); oz++) {
-          for (size_t oy = 0; oy < outputHeight(); oy++) {
-            for (size_t ox = 0; ox < outputWidth(); ox++) {
-              for (size_t g = 0; g < groups(); g++) {
-                for (size_t oc = 0; oc < groupOutputChannels(); oc++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto oz : c10::irange(outputDepth())) {
+          for(const auto oy : c10::irange(outputHeight())) {
+            for(const auto ox : c10::irange(outputWidth())) {
+              for(const auto g : c10::irange(groups())) {
+                for(const auto oc : c10::irange(groupOutputChannels())) {
                   accumulators
                       [((((i * outputDepth() + oz) * outputHeight() + oy) *
                              outputWidth() +
@@ -531,23 +531,23 @@ class ConvolutionOperatorTester {
           }
         }
       }
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t oz = 0; oz < outputDepth(); oz++) {
-          for (size_t oy = 0; oy < outputHeight(); oy++) {
-            for (size_t ox = 0; ox < outputWidth(); ox++) {
-              for (size_t kz = 0; kz < kernelDepth(); kz++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto oz : c10::irange(outputDepth())) {
+          for(const auto oy : c10::irange(outputHeight())) {
+            for(const auto ox : c10::irange(outputWidth())) {
+              for(const auto kz : c10::irange(kernelDepth())) {
                 const size_t iz = oz * subsamplingDepth() +
                     kz * dilationDepth() - paddingDepth();
                 if (iz < inputDepth()) {
-                  for (size_t ky = 0; ky < kernelHeight(); ky++) {
+                  for(const auto ky : c10::irange(kernelHeight())) {
                     const size_t iy = oy * subsamplingHeight() +
                         ky * dilationHeight() - paddingHeight();
                     if (iy < inputHeight()) {
-                      for (size_t kx = 0; kx < kernelWidth(); kx++) {
+                      for(const auto kx : c10::irange(kernelWidth())) {
                         const size_t ix = ox * subsamplingWidth() +
                             kx * dilationWidth() - paddingWidth();
                         if (ix < inputWidth()) {
-                          for (size_t g = 0; g < groups(); g++) {
+                          for(const auto g : c10::irange(groups())) {
                             for (size_t oc = 0; oc < groupOutputChannels();
                                  oc++) {
                               for (size_t ic = 0; ic < groupInputChannels();
@@ -748,12 +748,12 @@ class ConvolutionOperatorTester {
           ASSERT_TRUE(false);
       }
 
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t z = 0; z < outputDepth(); z++) {
-          for (size_t y = 0; y < outputHeight(); y++) {
-            for (size_t x = 0; x < outputWidth(); x++) {
-              for (size_t g = 0; g < groups(); g++) {
-                for (size_t c = 0; c < groupOutputChannels(); c++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto z : c10::irange(outputDepth())) {
+          for(const auto y : c10::irange(outputHeight())) {
+            for(const auto x : c10::irange(outputWidth())) {
+              for(const auto g : c10::irange(groups())) {
+                for(const auto c : c10::irange(groupOutputChannels())) {
                   const double scaledAccumulator =
                       ((double)accumulators
                            [((((i * outputDepth() + z) * outputHeight() + y) *

@@ -47,7 +47,7 @@ NetDef optimize_inference_net(
   // Step 1: count first and last operator for each blob
   std::unordered_set<std::string> all_blobs;
   std::unordered_map<std::string, std::pair<int, int>> ranges;
-  for (size_t i = 0; i < ops.size(); i++) {
+  for(const auto i : c10::irange(ops.size())) {
     for (auto& inp : ops[i].input()) {
       if (ranges.find(inp) != ranges.end()) {
         ranges[inp].second = i;

@@ -253,7 +253,7 @@ class GemmBlockSparseMicrokernelTester {
 
     const uint8_t* aPtr = a.data();
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(a.begin(), a.end(), std::ref(u8rng));
       std::generate(bias.begin(), bias.end(), std::ref(s32rng));
       std::fill(c.begin(), c.end(), 0.0f);
@@ -303,9 +303,9 @@ class GemmBlockSparseMicrokernelTester {
           std::ref(f32rng));
       /* Compute 32-bit results and output quantization arguments */
       std::fill(acc.begin(), acc.end(), 0);
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
-          for (size_t kIndex = 0; kIndex < k(); kIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
+          for(const auto kIndex : c10::irange(k())) {
             ASSERT_LT(mIndex * n() + nIndex, acc.size());
             ASSERT_LT(mIndex * k() + kIndex, a.size());
             acc[mIndex * n() + nIndex] +=
@@ -340,8 +340,8 @@ class GemmBlockSparseMicrokernelTester {
           0,
           &quantizationParams);
 
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
           ASSERT_EQ(
               c[mIndex * cStride() + nIndex],
               acc[mIndex * n() + nIndex])
@@ -382,7 +382,7 @@ class GemmBlockSparseMicrokernelTester {
 
     const uint8_t* aPtr = a.data();
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(a.begin(), a.end(), std::ref(u8rng));
       std::generate(bias.begin(), bias.end(), std::ref(s32rng));
       std::fill(c.begin(), c.end(), 0.0f);
@@ -430,9 +430,9 @@ class GemmBlockSparseMicrokernelTester {
           std::ref(f32rng));
       /* Compute 32-bit results and output quantization arguments */
       std::fill(acc.begin(), acc.end(), 0);
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
-          for (size_t kIndex = 0; kIndex < k(); kIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
+          for(const auto kIndex : c10::irange(k())) {
             ASSERT_LT(mIndex * n() + nIndex, acc.size());
             ASSERT_LT(mIndex * k() + kIndex, a.size());
             acc[mIndex * n() + nIndex] +=
@@ -476,8 +476,8 @@ class GemmBlockSparseMicrokernelTester {
           0,
           &quantizationParams);
 
-      for (size_t mIndex = 0; mIndex < m(); mIndex++) {
-        for (size_t nIndex = 0; nIndex < n(); nIndex++) {
+      for(const auto mIndex : c10::irange(m())) {
+        for(const auto nIndex : c10::irange(n())) {
           ASSERT_FLOAT_EQ(
               c[mIndex * cStride() + nIndex],
               acc[mIndex * n() + nIndex])

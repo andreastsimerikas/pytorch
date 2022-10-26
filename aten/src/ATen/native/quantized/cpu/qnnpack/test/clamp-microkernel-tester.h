@@ -75,7 +75,7 @@ class ClampMicrokernelTester {
     std::vector<uint8_t> x(n());
     std::vector<uint8_t> y(n());
     std::vector<uint8_t> yRef(n());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(x.begin(), x.end(), std::ref(u8rng));
       if (inplace()) {
         std::generate(y.begin(), y.end(), std::ref(u8rng));
@@ -89,7 +89,7 @@ class ClampMicrokernelTester {
           pytorch_qnnp_compute_u8_clamping_params(qmin(), qmax());
 
       /* Compute reference results */
-      for (size_t i = 0; i < n(); i++) {
+      for(const auto i : c10::irange(n())) {
         yRef[i] = std::max(std::min(xData[i], qmax()), qmin());
       }
 
@@ -97,7 +97,7 @@ class ClampMicrokernelTester {
       u8clamp(n(), xData, y.data(), &clampingParams);
 
       /* Verify results */
-      for (size_t i = 0; i < n(); i++) {
+      for(const auto i : c10::irange(n())) {
         ASSERT_LE(uint32_t(y[i]), uint32_t(qmax()))
             << "at position " << i << ", n = " << n();
         ASSERT_GE(uint32_t(y[i]), uint32_t(qmin()))

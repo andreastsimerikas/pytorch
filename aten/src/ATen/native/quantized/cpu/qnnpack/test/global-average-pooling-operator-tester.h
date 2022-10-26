@@ -157,17 +157,17 @@ class GlobalAveragePoolingOperatorTester {
         (batchSize() * width() - 1) * inputStride() + channels());
     std::vector<uint8_t> output(batchSize() * outputStride());
     std::vector<float> outputRef(batchSize() * channels());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(input.begin(), input.end(), std::ref(u8rng));
       std::fill(output.begin(), output.end(), 0xA5);
 
       /* Compute reference results */
       const double scale =
           double(inputScale()) / (double(width()) * double(outputScale()));
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t j = 0; j < channels(); j++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto j : c10::irange(channels())) {
           double acc = 0.0f;
-          for (size_t k = 0; k < width(); k++) {
+          for(const auto k : c10::irange(width())) {
             acc += double(
                 int32_t(input[(i * width() + k) * inputStride() + j]) -
                 int32_t(inputZeroPoint()));
@@ -221,8 +221,8 @@ class GlobalAveragePoolingOperatorTester {
       globalAveragePoolingOp = nullptr;
 
       /* Verify results */
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t c = 0; c < channels(); c++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto c : c10::irange(channels())) {
           ASSERT_LE(
               uint32_t(output[i * outputStride() + c]), uint32_t(outputMax()));
           ASSERT_GE(

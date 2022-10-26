@@ -25,7 +25,7 @@ TEST(SOFTARGMAX_OP, two_classes) {
 }
 
 TEST(SOFTARGMAX_OP, many_classes) {
-  for (size_t channels = 3; channels < 100; channels++) {
+  for(const auto channels : c10::irange(3, 100)) {
     SoftArgMaxOperatorTester()
         .batchSize(1)
         .channels(channels)

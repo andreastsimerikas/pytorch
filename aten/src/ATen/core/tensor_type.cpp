@@ -68,7 +68,7 @@ std::ostream& operator<<(std::ostream& out, const VaryingShape<T>& vs) {
     return out;
   }
 
-  for (size_t i = 0; i < vs.size(); i++) {
+  for(const auto i : c10::irange(vs.size())) {
     if (i > 0) {
       out << ", ";
     }
@@ -102,7 +102,7 @@ std::ostream& operator<<(
   auto sizes = ss.sizes().value();
 
   os << "(";
-  for (size_t i = 0; i < ss.rank().value(); i++) {
+  for(const auto i : c10::irange(ss.rank().value())) {
     if (i > 0) {
       os << ", ";
     }
@@ -222,7 +222,7 @@ VaryingShape<Stride> TensorType::computeStrideProps(
   std::vector<Stride> stride_properties;
 
 
-  for (size_t i = 0; i < stride_indices.size(); i++) {
+  for(const auto i : c10::irange(stride_indices.size())) {
     bool contiguous_ = tensor_contiguity;
     if (!contiguous_) {
       if (!has_overlap) {
@@ -407,7 +407,7 @@ VaryingShape<int64_t> TensorType::strides() const {
     return VaryingShape<int64_t>();
   }
   std::vector<c10::optional<int64_t>> ss(*strides_.size());
-  for (size_t i = 0; i < *strides_.size(); i++) {
+  for(const auto i : c10::irange(*strides_.size())) {
     if (!strides_[i].has_value()) {
       continue;
     }

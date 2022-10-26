@@ -652,7 +652,7 @@ struct TORCH_API TensorType : public SharedType {
     size_t prod = 1;
     const auto& shape = sizes();
 
-    for (size_t i = 0; i < shape.size(); i++) {
+    for(const auto i : c10::irange(shape.size())) {
       if (!shape[i]) {
         return c10::optional<size_t>{};
       }
@@ -797,7 +797,7 @@ struct TORCH_API TensorType : public SharedType {
         return strides;
 
       strides[dim_order[0]] = 1;
-      for (size_t i = 1; i < dim_order.size(); i++) {
+      for(const auto i : c10::irange(1, dim_order.size())) {
         auto cur_dim = dim_order[i];
         auto pre_dim = dim_order[i - 1];
         strides[cur_dim] = strides[pre_dim] * sizes[pre_dim];
@@ -812,7 +812,7 @@ struct TORCH_API TensorType : public SharedType {
       dim_order = {1, 4, 3, 2, 0};
     } else {
       auto ndims = in_sizes.size();
-      for (size_t i = 0; i < ndims; i++) {
+      for(const auto i : c10::irange(ndims)) {
         dim_order[i] = ndims - i - 1; // Reverse
       }
     }

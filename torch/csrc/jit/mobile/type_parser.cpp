@@ -48,7 +48,7 @@ std::vector<TypePtr> TypeParser::parseList() {
   std::vector<TypePtr> typePtrs;
   typePtrs.resize(pythonStrs_.size());
   static const c10::QualifiedName classPrefix = "__torch__.torch.classes";
-  for (size_t i = 0; i < pythonStrs_.size(); i++) {
+  for(const auto i : c10::irange(pythonStrs_.size())) {
     c10::QualifiedName qn(pythonStrs_[i]);
     c10::TypePtr type_ptr;
     if (classPrefix.isPrefixOf(qn)) {

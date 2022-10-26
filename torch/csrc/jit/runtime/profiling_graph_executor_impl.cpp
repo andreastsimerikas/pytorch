@@ -182,7 +182,7 @@ static bool needsGradientInProfilingMode(Block* b) {
 // `requires_grad` properties from `dnode->outputs()` will also be transferred
 static C10_UNUSED void setRequiresGradOnDiffGraph(Node* dnode) {
   auto gi = dnode->g(attr::Subgraph)->inputs();
-  for (size_t i = 0; i < dnode->inputs().size(); i++) {
+  for(const auto i : c10::irange(dnode->inputs().size())) {
     if (auto ty = dnode->input(i)->type()->cast<TensorType>()) {
       auto gi_ty = gi[i]->type()->expect<TensorType>();
       gi[i]->setType(gi_ty->withRequiresGrad(ty->requires_grad()));

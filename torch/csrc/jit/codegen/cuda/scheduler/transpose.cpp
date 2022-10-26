@@ -348,7 +348,7 @@ std::shared_ptr<TransposeParams> getTransposeHeuristics(
   std::vector<int64_t> shape_in_ref1;
   shape_in_ref1.reserve(reference1->nDims());
   int64_t n_elems = 1;
-  for (size_t ref_i = 0; ref_i < ref_root.size(); ref_i++) {
+  for(const auto ref_i : c10::irange(ref_root.size())) {
     auto id = ref_root[ref_i];
     auto concrete_id = domain_map.getComputeAtMap().getConcreteMappedID(
         id, IdMappingMode::EXACT);

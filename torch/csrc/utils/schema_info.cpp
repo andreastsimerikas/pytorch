@@ -19,7 +19,7 @@ void SchemaInfo::addArgumentValues(
       value_list.size() <= schema_.arguments().size(),
       "Schema does not have enough arguments for value list");
 
-  for (size_t i = 0; i < value_list.size(); i++) {
+  for(const auto i : c10::irange(value_list.size())) {
     if (value_list[i] != c10::nullopt) {
       value_map_[schema_.arguments()[i].name()] = *(value_list[i]);
       alias_maps_current_ = false;
@@ -42,7 +42,7 @@ bool SchemaInfo::hasInputArgumentNamed(const std::string& name) const {
 }
 
 bool SchemaInfo::is_mutable() {
-  for (size_t i = 0; i < schema_.arguments().size(); i++) {
+  for(const auto i : c10::irange(schema_.arguments().size())) {
     if (is_mutable({c10::SchemaArgType::input, i})) {
       return true;
     }
@@ -220,7 +220,7 @@ void SchemaInfo::ensureConservativity(
     const std::unordered_set<at::Symbol>& duplicates,
     const std::vector<c10::Argument>& arguments_list,
     c10::SchemaArgType type) {
-  for (size_t i = 0; i < arguments_list.size(); i++) {
+  for(const auto i : c10::irange(arguments_list.size())) {
     if (arguments_list[i].alias_info()) {
       for (const auto& set : arguments_list[i].alias_info()->afterSets()) {
         if (duplicates.count(set)) {
@@ -316,7 +316,7 @@ void SchemaInfo::initSchemaInfo() {
                                        arguments_list,
                                    c10::SchemaArgType type) {
     std::unordered_set<at::Symbol> seen;
-    for (size_t i = 0; i < arguments_list.size(); i++) {
+    for(const auto i : c10::irange(arguments_list.size())) {
       const c10::Argument& argument = arguments_list[i];
       if (argument.alias_info()) {
         if (argument.alias_info()->isWildcardAfter()) {
@@ -375,7 +375,7 @@ void SchemaInfo::generateAliasMaps() {
       schema_.returns().size(), std::unordered_set<size_t>());
 
   // Fills input_alias_map_
-  for (size_t i = 0; i < schema_.arguments().size(); i++) {
+  for(const auto i : c10::irange(schema_.arguments().size())) {
     for (size_t j = i; j < schema_.arguments().size(); j++) {
       if (i == j) {
         input_alias_map_[i].insert(i);
@@ -401,8 +401,8 @@ void SchemaInfo::generateAliasMaps() {
   // test(Tensor a, Tensor(*) b, Tensor[] c) -> Tensor
   // where value(a) is contained in value(c), then a will be added to the
   // wildcard set where it can now alias b.
-  for (size_t i = 0; i < schema_.arguments().size(); i++) {
-    for (size_t j = 0; j < schema_.arguments().size(); j++) {
+  for(const auto i : c10::irange(schema_.arguments().size())) {
+    for(const auto j : c10::irange(schema_.arguments().size())) {
       // if they are already aliasing, there is no way one contains the other
       if (!input_alias_map_[i].count(j) &&
           value_map_.count(schema_.arguments()[i].name()) &&
@@ -417,8 +417,8 @@ void SchemaInfo::generateAliasMaps() {
   }
 
   // Fills output_alias_map_
-  for (size_t i = 0; i < schema_.arguments().size(); i++) {
-    for (size_t j = 0; j < schema_.returns().size(); j++) {
+  for(const auto i : c10::irange(schema_.arguments().size())) {
+    for(const auto j : c10::irange(schema_.returns().size())) {
       if (schema_.may_alias(
               {c10::SchemaArgType::input, i},
               {c10::SchemaArgType::output, j})) {

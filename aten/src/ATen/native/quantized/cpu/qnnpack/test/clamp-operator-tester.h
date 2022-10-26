@@ -105,13 +105,13 @@ class ClampOperatorTester {
     std::vector<uint8_t> output(
         (batchSize() - 1) * outputStride() + channels());
     std::vector<uint8_t> outputRef(batchSize() * channels());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for(const auto iteration : c10::irange(iterations())) {
       std::generate(input.begin(), input.end(), std::ref(u8rng));
       std::fill(output.begin(), output.end(), 0xA5);
 
       /* Compute reference results */
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t c = 0; c < channels(); c++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto c : c10::irange(channels())) {
           const uint8_t x = input[i * inputStride() + c];
           const uint8_t y = std::min(std::max(x, qmin()), qmax());
           outputRef[i * channels() + c] = y;
@@ -147,8 +147,8 @@ class ClampOperatorTester {
       clampOp = nullptr;
 
       /* Verify results */
-      for (size_t i = 0; i < batchSize(); i++) {
-        for (size_t c = 0; c < channels(); c++) {
+      for(const auto i : c10::irange(batchSize())) {
+        for(const auto c : c10::irange(channels())) {
           ASSERT_LE(uint32_t(output[i * channels() + c]), uint32_t(qmax()))
               << "at position " << i << ", batch size = " << batchSize()
               << ", channels = " << channels();

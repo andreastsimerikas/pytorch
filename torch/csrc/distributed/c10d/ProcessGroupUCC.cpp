@@ -868,7 +868,7 @@ c10::intrusive_ptr<Work> ProcessGroupUCC::allgather(
   } else {
     WorkData* data = new WorkData();
     std::vector<at::Tensor> flat_output(outputTensors.size());
-    for (size_t i = 0; i < outputTensors.size(); i++) {
+    for(const auto i : c10::irange(outputTensors.size())) {
       TORCH_CHECK(
           outputTensors[i].size() == outputTensors.size() * size_,
           "Tensor output list is not valid for the number of participants");
@@ -895,9 +895,9 @@ c10::intrusive_ptr<Work> ProcessGroupUCC::allgather(
       bool isCuda = outputTensors[0][0].device().is_cuda();
       ;
 #endif
-      for (size_t i = 0; i < outputTensors.size(); i++) {
+      for(const auto i : c10::irange(outputTensors.size())) {
         auto inumel = inputTensors[i].numel();
-        for (size_t j = 0; j < outputTensors[i].size(); j++) {
+        for(const auto j : c10::irange(outputTensors[i].size())) {
           TORCH_CHECK(
               (outputTensors[i][j].numel() == inumel),
               "Tensor operand counts must be same");
@@ -1358,7 +1358,7 @@ c10::intrusive_ptr<Work> ProcessGroupUCC::reduce_scatter(
   initComm(inputTensors[0][0].device());
   auto data = std::make_unique<WorkData>();
   std::vector<at::Tensor> flat_input(inputTensors.size());
-  for (size_t i = 0; i < inputTensors.size(); i++) {
+  for(const auto i : c10::irange(inputTensors.size())) {
     TORCH_CHECK(
         inputTensors[i].size() == inputTensors.size() * size_,
         "Tensor input list is not valid for the number of participants");
@@ -1390,9 +1390,9 @@ c10::intrusive_ptr<Work> ProcessGroupUCC::reduce_scatter(
 #ifdef USE_CUDA
     bool isCuda = inputTensors[0][0].device().is_cuda();
 #endif
-    for (size_t i = 0; i < isize; i++) {
+    for(const auto i : c10::irange(isize)) {
       auto onumel = outputTensors[i].numel();
-      for (size_t j = 0; j < inputTensors[i].size(); j++) {
+      for(const auto j : c10::irange(inputTensors[i].size())) {
         TORCH_CHECK(
             (inputTensors[i][j].numel() == onumel),
             "Tensor operand counts must be same");

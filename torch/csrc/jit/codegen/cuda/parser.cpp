@@ -312,7 +312,7 @@ struct MemoryFormat {
         //   2. but when we shrink it to rank 2, we have {1, 3} where 1 < (4-2)
         //   and it can't be handled, we return c10::nullopt.
         int collapsed_ranks = static_cast<int>(cur_rank - rank);
-        for (size_t i = 0; i < rank; i++) {
+        for(const auto i : c10::irange(rank)) {
           if (stride_order[i] < collapsed_ranks) {
             // illegal collapsing, return c10::nullopt
             return c10::nullopt;
@@ -630,7 +630,7 @@ std::pair<MemoryFormat, std::list<CgValue>> getPWFormatValues(
     // broadcasted tensors. Consider pointwise operation between three tensor
     // [N, C, H, W] + [C, H, W] + [H, W]
     for (size_t i = 0; i < formats.size() && format.hasPermutation(); i++) {
-      for (size_t j = 0; j < formats.size(); j++) {
+      for(const auto j : c10::irange(formats.size())) {
         // don't compare scalar tensor or scalar
         if (ranks[i] <= 0 || ranks[j] <= 0 || i == j) {
           continue;

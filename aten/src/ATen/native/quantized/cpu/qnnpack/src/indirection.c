@@ -50,8 +50,8 @@ void pytorch_qnnp_indirection_init_conv3d(
       fxdiv_init_size_t(output_height * output_width);
   const struct fxdiv_divisor_size_t output_x_divisor =
       fxdiv_init_size_t(output_width);
-  for (size_t group = 0; group < groups; group++) {
-    for (size_t image = 0; image < batch_size; image++) {
+  for(const auto group : c10::irange(groups)) {
+    for(const auto image : c10::irange(batch_size)) {
       for (size_t output_tile_start = 0; output_tile_start < tiled_output_size;
            output_tile_start += output_tile_size) {
         for (size_t output_tile_offset = 0;
@@ -68,11 +68,11 @@ void pytorch_qnnp_indirection_init_conv3d(
           const size_t output_y = y_x.quotient;
           const size_t output_x = y_x.remainder;
 
-          for (size_t kernel_z = 0; kernel_z < kernel_depth; kernel_z++) {
+          for(const auto kernel_z : c10::irange(kernel_depth)) {
             const size_t input_z = output_z * stride_depth +
                 kernel_z * dilation_depth - input_padding_depth;
             if (input_z < input_depth) {
-              for (size_t kernel_y = 0; kernel_y < kernel_height; kernel_y++) {
+              for(const auto kernel_y : c10::irange(kernel_height)) {
                 const size_t input_y = output_y * stride_height +
                     kernel_y * dilation_height - input_padding_height;
                 if (input_y < input_height) {
@@ -114,8 +114,8 @@ void pytorch_qnnp_indirection_init_conv3d(
                 }
               }
             } else {
-              for (size_t kernel_y = 0; kernel_y < kernel_height; kernel_y++) {
-                for (size_t kernel_x = 0; kernel_x < kernel_width; kernel_x++) {
+              for(const auto kernel_y : c10::irange(kernel_height)) {
+                for(const auto kernel_x : c10::irange(kernel_width)) {
                   const size_t index = (group * batch_size + image) *
                           tiled_output_size * kernel_size +
                       output_tile_start * kernel_size +
@@ -262,17 +262,17 @@ void pytorch_qnnp_indirection_init_dwconv(
   kz /* slice */
 
   for (size_t image = batch_start; image < batch_size; image++) {
-    for (size_t output_z = 0; output_z < output_depth; output_z++) {
-      for (size_t kernel_z = 0; kernel_z < kernel_depth; kernel_z++) {
+    for(const auto output_z : c10::irange(output_depth)) {
+      for(const auto kernel_z : c10::irange(kernel_depth)) {
         const size_t input_z = output_z * stride_depth +
             kernel_z * dilation_depth - input_padding_depth;
         if (input_z < input_depth) {
-          for (size_t output_y = 0; output_y < output_height; output_y++) {
-            for (size_t kernel_y = 0; kernel_y < kernel_height; kernel_y++) {
+          for(const auto output_y : c10::irange(output_height)) {
+            for(const auto kernel_y : c10::irange(kernel_height)) {
               const size_t input_y = output_y * stride_height +
                   kernel_y * dilation_height - input_padding_height;
               if (input_y < input_height) {
-                for (size_t output_x = 0; output_x < output_width; output_x++) {
+                for(const auto output_x : c10::irange(output_width)) {
                   for (size_t kernel_x = 0; kernel_x < kernel_width;
                        kernel_x++) {
                     const size_t input_x = output_x * stride_width +
@@ -297,7 +297,7 @@ void pytorch_qnnp_indirection_init_dwconv(
                   }
                 }
               } else {
-                for (size_t output_x = 0; output_x < output_width; output_x++) {
+                for(const auto output_x : c10::irange(output_width)) {
                   for (size_t kernel_x = 0; kernel_x < kernel_width;
                        kernel_x++) {
                     const size_t index = DW_CONV_3D_INDEX(
@@ -314,10 +314,10 @@ void pytorch_qnnp_indirection_init_dwconv(
             }
           }
         } else {
-          for (size_t output_y = 0; output_y < output_height; output_y++) {
-            for (size_t kernel_y = 0; kernel_y < kernel_height; kernel_y++) {
-              for (size_t output_x = 0; output_x < output_width; output_x++) {
-                for (size_t kernel_x = 0; kernel_x < kernel_width; kernel_x++) {
+          for(const auto output_y : c10::irange(output_height)) {
+            for(const auto kernel_y : c10::irange(kernel_height)) {
+              for(const auto output_x : c10::irange(output_width)) {
+                for(const auto kernel_x : c10::irange(kernel_width)) {
                   const size_t index = DW_CONV_3D_INDEX(
                       output_z,
                       output_y,
@@ -363,8 +363,8 @@ void pytorch_qnnp_indirection_init_deconv2d(
   const size_t output_size = output_height * output_width;
   const size_t kernel_size = kernel_height * kernel_width;
 
-  for (size_t group = 0; group < groups; group++) {
-    for (size_t image = 0; image < batch_size; image++) {
+  for(const auto group : c10::irange(groups)) {
+    for(const auto image : c10::irange(batch_size)) {
       for (size_t output_tile_start = 0; output_tile_start < tiled_output_size;
            output_tile_start += output_tile_size) {
         for (size_t output_tile_offset = 0;
@@ -375,11 +375,11 @@ void pytorch_qnnp_indirection_init_deconv2d(
           const size_t output_index = min(tiled_output_index, output_size - 1);
           const size_t output_y = output_index / output_width;
           const size_t output_x = output_index % output_width;
-          for (size_t kernel_y = 0; kernel_y < kernel_height; kernel_y++) {
+          for(const auto kernel_y : c10::irange(kernel_height)) {
             const size_t y =
                 output_y + input_padding_height - kernel_y * dilation_height;
             const size_t input_y = y / stride_height;
-            for (size_t kernel_x = 0; kernel_x < kernel_width; kernel_x++) {
+            for(const auto kernel_x : c10::irange(kernel_width)) {
               const size_t x =
                   output_x + input_padding_width - kernel_x * dilation_width;
               const size_t input_x = x / stride_width;
@@ -428,14 +428,14 @@ void pytorch_qnnp_indirection_init_maxpool2d(
   const size_t step_width = op->step_width;
 
   for (size_t image = batch_start; image < batch_size; image++) {
-    for (size_t output_y = 0; output_y < output_height; output_y++) {
-      for (size_t pooling_y = 0; pooling_y < pooling_height; pooling_y++) {
+    for(const auto output_y : c10::irange(output_height)) {
+      for(const auto pooling_y : c10::irange(pooling_height)) {
         const size_t input_y =
             doz(output_y * stride_height + pooling_y * dilation_height,
                 input_padding_height);
         const size_t clamped_input_y = min(input_y, input_height - 1);
-        for (size_t output_x = 0; output_x < output_width; output_x++) {
-          for (size_t pooling_x = 0; pooling_x < pooling_width; pooling_x++) {
+        for(const auto output_x : c10::irange(output_width)) {
+          for(const auto pooling_x : c10::irange(pooling_width)) {
             const size_t input_x =
                 doz(output_x * stride_width + pooling_x * dilation_width,
                     input_padding_width);

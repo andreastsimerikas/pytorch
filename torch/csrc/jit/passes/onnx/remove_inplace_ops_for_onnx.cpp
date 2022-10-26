@@ -679,7 +679,7 @@ void InplaceConverter::gatherAttrNameInitialValueMap(
         attr_name_value_map.insert({fullName, paramConst});
       } else if (auto attrVal = tryInsertConstant(*graph_, attr)) {
         // TODO: Extend support for attribute of type List[Tensor] etc.
-        for (size_t i = 0; i < type->getAttributes().size(); i++) {
+        for(const auto i : c10::irange(type->getAttributes().size())) {
           if (type->getAttributeName(i) == name) {
             paramConst = *attrVal;
             attr_name_value_map.insert({fullName, paramConst});

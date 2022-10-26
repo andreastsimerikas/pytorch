@@ -714,16 +714,6 @@ class InstructionTranslatorBase(object):
                 )
             )
         elif (
-            isinstance(left, TensorVariable) or isinstance(right, TensorVariable)
-        ) and op in supported_tensors:
-            self.push(
-                TensorVariable.create(
-                    self,
-                    supported_tensors[op](left.as_proxy(), right.as_proxy()),
-                    **options,
-                )
-            )
-        elif (
             left.is_python_constant()
             and right.is_python_constant()
             and op in supported_any
@@ -734,6 +724,16 @@ class InstructionTranslatorBase(object):
                     supported_any[op](
                         left.as_python_constant(), right.as_python_constant()
                     ),
+                    **options,
+                )
+            )
+        elif (
+            isinstance(left, TensorVariable) or isinstance(right, TensorVariable)
+        ) and op in supported_tensors:
+            self.push(
+                TensorVariable.create(
+                    self,
+                    supported_tensors[op](left.as_proxy(), right.as_proxy()),
                     **options,
                 )
             )

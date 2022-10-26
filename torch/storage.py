@@ -219,9 +219,12 @@ class _UntypedStorage(torch._C.StorageBase, _StorageBase):
         return self.device.type == 'cuda'
 
 def _load_from_bytes(b):
-    return torch.load(io.BytesIO(b))
-
-
+    if torch.cuda.is_available():
+        return torch.load(io.BytesIO(b)) 
+    else
+        return torch.load(io.BytesIO(b), map_location=torch.device('cpu')) 
+    
+    
 _StorageBase.type = _type  # type: ignore[assignment]
 _StorageBase.cuda = _cuda  # type: ignore[assignment]
 
